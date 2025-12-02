@@ -1,0 +1,17 @@
+{
+    "endianness": "little",
+    "eeprom_size": 512,
+    "eeprom_page_size": 32,
+    "page_aligned_blocks": [
+        "*"
+    ],
+    "external_headers": [],
+    "enter_critical_section_operation": null,
+    "exit_critical_section_operation": null,
+    "compiler_directives": {
+        "opening_pack_directive": null,
+        "closing_pack_directive": null,
+        "pack_attribute": "__attribute__((packed))",
+        "block_placement_directives": {}
+    }
+}

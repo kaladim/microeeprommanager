@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>mEEM Configurator</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛠️</text></svg>">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="app" id="app">
+        <input id="openDataModelInput" type="file" accept=".json" style="display:none" />
+        <input id="openPlatformInput" type="file" accept=".json" style="display:none" />
+        <input id="openChecksumInput" type="file" accept=".json" style="display:none" />
+
+        <div class="content">
+            <div class="tabs">
+                <button id="tabData" class="active">Data model</button>
+                <button id="tabPlatform">Platform settings</button>
+                <button id="tabChecksum">Checksum parameters</button>
+            </div>
+
+            <div class="main">
+                <div class="split" id="dataArea">
+                    <div class="left" id="leftPanel">
+                        <div style="display:flex;gap:8px;margin-bottom:8px">
+                            <button id="loadDataModelBtn" style="flex:1">📂 Load from file</button>
+                            <div class="split-button" style="flex:1">
+                                <button id="saveDataModelBtn" class="split-button-main">💾 Save to file</button>
+                                <button id="saveDataModelBtnMenu" class="split-button-arrow">▼</button>
+                            </div>
+                        </div>
+                        <div class="tree" id="tree">
+                            <div class="hint" id="treeHint">No datamodel loaded. Create a new datamodel or load from
+                                file.</div>
+                            <div id="treeRoot"></div>
+                        </div>
+                    </div>
+                    <div class="resizer" id="resizer"></div>
+                    <div class="right" id="props">
+                        <div id="propsContent">
+                            <p class="hint">Select a node to edit its properties</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="platformArea" style="display:none;flex:1">
+                    <div class="right" style="flex:1">
+                        <div style="display:flex;gap:8px;margin-bottom:12px">
+                            <button id="loadPlatformBtn" style="flex:1">📂 Load from file</button>
+                            <div class="split-button" style="flex:1">
+                                <button id="savePlatformBtn" class="split-button-main">💾 Save to file</button>
+                                <button id="savePlatformBtnMenu" class="split-button-arrow">▼</button>
+                            </div>
+                        </div>
+                        <div class="hint" id="platformHint">No platform settings loaded. Create new settings or load
+                            from file.</div>
+                        <div class="settings-grid" id="platformGrid"></div>
+                    </div>
+                </div>
+
+                <div id="checksumArea" style="display:none;flex:1">
+                    <div class="right" style="flex:1">
+                        <div style="display:flex;gap:8px;margin-bottom:12px">
+                            <button id="loadChecksumBtn" style="flex:1">📂 Load from file</button>
+                            <div class="split-button" style="flex:1">
+                                <button id="saveChecksumBtn" class="split-button-main">💾 Save to file</button>
+                                <button id="saveChecksumBtnMenu" class="split-button-arrow">▼</button>
+                            </div>
+                        </div>
+                        <div class="hint" id="checksumHint">No checksum parameters loaded. Create new parameters or load
+                            from file.</div>
+                        <div class="settings-grid" id="checksumGrid"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="errorPanel"
+            style="display:none;background:#2b1a1a;color:#ffd6d6;padding:8px;border-top:1px solid rgba(255,0,0,0.06);max-height:200px;overflow:auto;position:fixed;left:0;right:0;bottom:28px;z-index:199;box-shadow:0 -4px 12px rgba(0,0,0,0.6)">
+        </div>
+        <div class="status" id="status">--</div>
+
+        <div class="context-menu" id="contextMenu"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
