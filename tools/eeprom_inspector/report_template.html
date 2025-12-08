@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>mEEM's EEPROM inspector</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔎</text></svg>">
+    <style>
+        body {
+            background-color: #1E1E1E;
+            color: #D4D4D4;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+
+        h2 {
+            color: #61AFEF;
+            border-bottom: 1px solid #5c6370;
+            padding-bottom: 4px;
+            margin-bottom: 15px;
+        }
+
+        /* Block header styling */
+        .block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #5c6370;
+            padding-bottom: 4px;
+            margin-bottom: 15px;
+        }
+
+        .block-title {
+            color: #61AFEF;
+            margin: 0;
+            font-size: 1.5em;
+            font-weight: bold;
+            border-bottom: none;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #5c6370;
+            padding: 8px 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #282c34;
+            color: #ABB2BF;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* First column styling - equal width */
+        td:first-child,
+        th:first-child {
+            width: 200px;
+            min-width: 200px;
+            max-width: 200px;
+            word-wrap: break-word;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Numeric value styling */
+        .numeric-value {
+            cursor: pointer;
+            color: #98C379;
+            font-family: 'Consolas', 'Monaco', monospace;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+
+        .numeric-value:hover {
+            background-color: #3E4452;
+            border-radius: 3px;
+        }
+
+        /* Toggle button */
+        .toggle-button {
+            background-color: #0E639C;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.8em;
+            flex-shrink: 0;
+        }
+
+        .toggle-button:hover {
+            background-color: #1177BB;
+        }
+
+        /* Header info styling */
+        .header-info {
+            background-color: #252526;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 1px solid #5c6370;
+        }
+
+        .header-info p {
+            margin: 5px 0;
+            color: #98C379;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        .header-info .hover-value {
+            transition: background-color 0.2s;
+            border-radius: 3px;
+            padding: 1px 2px;
+            margin: -1px -2px;
+        }
+
+        .header-info .hover-value:hover {
+            background-color: #3E4452;
+        }
+
+        .header-info strong {
+            color: #D4D4D4;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Block info styling */
+        .block-info {
+            background-color: #2D2D30;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            border-left: 4px solid #61AFEF;
+        }
+
+        .block-info p {
+            margin: 3px 0;
+        }
+
+        .badge-info {
+            display: inline-block;
+            background-color: #264F78;
+            color: #FFFFFF;
+            font-size: 0.8em;
+            font-weight: normal;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        .badge-status-valid {
+            display: inline-block;
+            background-color: #00831f;
+            color: #FFFFFF;
+            font-size: 0.8em;
+            font-weight: normal;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        .badge-status-invalid {
+            display: inline-block;
+            background-color: #e11616;
+            color: #FFFFFF;
+            font-size: 0.8em;
+            font-weight: normal;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        /* Nested table styling for arrays */
+        .nested-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 0;
+            background-color: #252526;
+        }
+
+        .nested-table td {
+            border: 1px solid #404040;
+            padding: 4px 8px;
+            font-size: 1.0em;
+        }
+
+        .nested-table td:first-child {
+            width: 10px;
+            min-width: 10px;
+            max-width: 50px;
+            text-align: center;
+            font-weight: normal;
+            color: #56B6C2;
+        }
+
+        .nested-table td:nth-child(2) {
+            width: calc(25% - 25px);
+        }
+
+        .nested-table td:nth-child(3) {
+            width: 15%;
+        }
+
+        .nested-table td:nth-child(4) {
+            width: 60%;
+        }
+
+        .array-container {
+            padding: 0;
+        }
+
+        .array-row {
+            background-color: #2A2A2A;
+        }
+
+        .array-row td {
+            padding: 0;
+            border: none;
+        }
+    </style>
+    <script>
+        let blockStates = {};
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add click handlers to numeric values
+            document.querySelectorAll('.numeric-value').forEach(element => {
+                element.onclick = () => toggleSingleValue(element);
+            });
+        });
+
+        function toggleNumericFormatWholeBlock(blockIndex) {
+            // Initialize block state if not exists
+            if (!(blockIndex in blockStates)) {
+                blockStates[blockIndex] = true; // true = hex mode
+            }
+
+            blockStates[blockIndex] = !blockStates[blockIndex];
+            const isHexMode = blockStates[blockIndex];
+            const toggleBtn = document.querySelector(`[data-block-id="${blockIndex}"]`);
+            toggleBtn.textContent = isHexMode ? 'Show all in DEC' : 'Show all in HEX';
+
+            // Get the specific block container
+            const blockContainer = toggleBtn.closest('.block-container');
+            blockContainer.querySelectorAll('.numeric-value').forEach(element => {
+                toggleSingleValue(element);
+            });
+        }
+
+        function toggleSingleValue(element) {
+            let cell = element.closest('td');
+
+            if (cell) {
+                // This is a table cell
+                let current_is_hex = cell.textContent.trim().startsWith('0x');
+                element.textContent = cell.getAttribute(current_is_hex ? 'data-dec' : 'data-hex');
+            } else {
+                // Independent element
+                let current_is_hex = element.textContent.trim().startsWith('0x');
+                let parsed = parseInt(element.textContent, current_is_hex ? 16 : 10);
+                element.textContent = (current_is_hex ? '' : '0x') + parsed.toString(current_is_hex ? 10 : 16).toUpperCase();
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <h2>mEEM's EEPROM inspector :: Report</h2>
+
+    <div class="header-info">
+        <p><strong>Generated on:</strong> <span class="hover-value">{{ report_header["date"] }}</span></p>
+        <p><strong>Binary file:</strong> <span class="hover-value">{{ report_header["bin_file_path"] }}</span></p>
+        <p><strong>Data model file:</strong> <span class="hover-value">{{ report_header["datamodel_path"] }}</span></p>
+        <p><strong>Platform settings file:</strong> <span class="hover-value">{{ report_header["settings_path"]
+                }}</span></p>
+        <p><strong>Checksum parameters:</strong> <span class="hover-value">{{ report_header["checksum_params"] }}</span>
+        </p>
+    </div>
+
+    {% for block in block_views %}
+    <div class="block-container">
+        <div class="block-header">
+            <h2 class="block-title">Block: {{ block.name }}</h2>
+            <button class="toggle-button" data-block-id="{{ loop.index0 }}"
+                onclick="toggleNumericFormatWholeBlock('{{ loop.index0 }}')">Show all in DEC</button>
+        </div>
+
+        <div class="block-info">
+            <p><strong>Management type:</strong> {{ block.management_type }}</p>
+            <p><strong>Total size:</strong> <span class="numeric-value">{{ "0x%X"|format(block.total_size) }}</span>
+                bytes</p>
+            <p><strong>Description:</strong> {{ block.description }}</p>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>{{ "Object" }}</th>
+                    <th>Description</th>
+                    {% for i in range(0, block.instance_count) %}
+                    {% set checksum_param = block.params|selectattr("name", "equalto", "Checksum ")|first %}
+                    {% set seq_cntr_param = block.params|selectattr("name", "equalto", "Sequence
+                    counter")|first|default(none) %}
+                    <th>Instance #{{ i }}
+                        {% if checksum_param.instances[i].is_valid %}
+                        <span class="badge-status-valid">Valid</span>
+                        {% else %}
+                        <span class="badge-status-invalid">Invalid</span>
+                        {% endif %}
+                        {% if seq_cntr_param is not none and seq_cntr_param.instances[i].is_most_recent %}
+                        <span class="badge-info">Most recent</span>
+                        {% endif %}
+                    </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for param in block.params %}
+                <tr>
+                    {% set data_type = param.data_type %}
+                    {% if param.instances[0].data|length > 1 %}
+                    {% set data_type = data_type + "[" + param.instances[0].data|length|string + "]" %}
+                    {% endif %}
+                    <td>{{ param.name }}
+                        <span class="badge-info">{{ data_type }}</span>
+                    </td>
+                    <td>{{ param.description }}</td>
+
+                    {% for instance in param.instances %}
+                    {% if instance.data|length > 1 %}
+                    <td class="array-container">
+                        <table class="nested-table">
+                            <tbody>
+                                {% for element in instance.data %}
+                                <tr>
+                                    <td>[{{ loop.index0 }}]</td>
+                                    <td data-dec="{{element.value_dec}}" data-hex="{{element.value_hex}}">
+                                        <span class="numeric-value">{{ element.value_hex }}</span>
+                                        <span class="badge-info">@ {{ element.address }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </td>
+                    {% else %}
+                    <td data-dec="{{instance.data[0].value_dec}}" data-hex="{{instance.data[0].value_hex}}">
+                        <span class="numeric-value">{{ instance.data[0].value_hex }}</span>
+                        <span class="badge-info">@ {{ instance.data[0].address }}</span>
+                    </td>
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
+</body>
+
+</html>

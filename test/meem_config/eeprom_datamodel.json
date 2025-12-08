@@ -1,0 +1,179 @@
+{
+    "name": "MEEM_test_configuration",
+    "description": "EEPROM configuration for testing purposes. Tests doesn't care about the parameters, they use the caches directly.",
+    "children": [
+        {
+            "name": "Block_WearLeveling_0",
+            "description": "Some optional description...",
+            "children": [
+                {
+                    "name": "param",
+                    "description": "// Some optional description, containing C++ comment",
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 8,
+                    "default_value": [
+                        186,
+                        186,
+                        206,
+                        202,
+                        186,
+                        186,
+                        206,
+                        202
+                    ]
+                }
+            ],
+            "management_type": 3,
+            "instance_count": 15,
+            "data_recovery_strategy": 1,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block_Basic_0",
+            "description": "Some optional description...",
+            "children": [
+                {
+                    "name": "param",
+                    "description": "Some optional description...",
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 11,
+                    "default_value": [
+                        186,
+                        186,
+                        186,
+                        186,
+                        186,
+                        186,
+                        186,
+                        186,
+                        186,
+                        186,
+                        186
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block_BackupCopy_0",
+            "description": "Some optional description...",
+            "children": [
+                {
+                    "name": "param",
+                    "description": "Some optional description...",
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 7,
+                    "default_value": [
+                        0,
+                        1,
+                        2,
+                        3,
+                        0,
+                        1,
+                        2
+                    ]
+                }
+            ],
+            "management_type": 1,
+            "instance_count": 2,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block_MultiProfile_0",
+            "description": "Some optional description...",
+            "children": [
+                {
+                    "name": "param",
+                    "description": "Some optional description...",
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 13,
+                    "default_value": [
+                        186,
+                        186,
+                        186,
+                        186,
+                        186,
+                        186,
+                        186,
+                        186,
+                        186,
+                        186,
+                        186,
+                        186,
+                        186
+                    ]
+                }
+            ],
+            "management_type": 2,
+            "instance_count": 4,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block_WearLeveling_1",
+            "description": "Some optional description...",
+            "children": [
+                {
+                    "name": "param",
+                    "description": "Some optional description...",
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 12,
+                    "default_value": [
+                        186,
+                        186,
+                        186,
+                        186,
+                        186,
+                        186,
+                        186,
+                        186,
+                        186,
+                        186,
+                        186,
+                        186
+                    ]
+                }
+            ],
+            "management_type": 3,
+            "instance_count": 2,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block_BackupCopy_1",
+            "description": "Some optional description...",
+            "children": [
+                {
+                    "name": "param",
+                    "description": "Some optional description...",
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 7,
+                    "default_value": [
+                        0,
+                        1,
+                        2,
+                        3,
+                        0,
+                        1,
+                        2
+                    ]
+                }
+            ],
+            "management_type": 1,
+            "instance_count": 2,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        }
+    ],
+    "checksum_size": 1
+}

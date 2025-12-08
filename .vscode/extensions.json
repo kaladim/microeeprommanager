@@ -1,0 +1,13 @@
+{
+    "recommendations": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cpptools-extension-pack",
+        "ms-vscode.cmake-tools",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.vscode-python-envs",
+        "yzhang.markdown-all-in-one",
+        "matepek.vscode-catch2-test-adapter",
+    ],
+    "unwantedRecommendations": []
+}

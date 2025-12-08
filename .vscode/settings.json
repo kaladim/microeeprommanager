@@ -1,0 +1,15 @@
+{
+    "python.defaultInterpreterPath": "./.venv_meem/Scripts/python.exe",
+    "python.terminal.activateEnvironment": true,
+    "python.envFile": "${workspaceFolder}/.venv_meem/.env",
+    "cmake.sourceDirectory": "${workspaceFolder}",
+    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "cmake.configureOnOpen": false,
+    "cmake.buildBeforeRun": true,
+    "cmake.clearOutputBeforeBuild": true,
+    "files.associations": {
+        "meem_eeaif.h": "c",
+        "meem_genconfig.h": "c",
+        "meem_internal.h": "c"
+    }
+}

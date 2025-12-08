@@ -1,0 +1,5 @@
+jinja2
+tzlocal
+colorama
+crcmod
+bincopy

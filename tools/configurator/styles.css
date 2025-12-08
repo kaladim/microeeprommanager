@@ -1,0 +1,827 @@
+:root {
+    --bg: #1e1e1e;
+    --panel: #252526;
+    --accent: #007acc;
+    --muted: #888;
+    --control-width: 360px;
+    /* unified width for textboxes and custom-selects */
+}
+
+/* Ensure page uses the dark theme background and readable text color */
+html,
+body {
+    height: 100%;
+    margin: 0;
+    background: var(--bg);
+    color: #ddd;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Make app fill viewport and allow content to stretch to the fixed status bar */
+html,
+body,
+.app {
+    height: 100%;
+    min-height: 100vh;
+}
+
+.app {
+    display: flex;
+    flex-direction: row;
+    min-height: 100vh;
+}
+
+/* Vertical menu on the left side */
+.menu {
+    width: 60px;
+    background: var(--panel);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0;
+    gap: 8px;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
+}
+
+.menu button {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: inherit;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    transition: all 0.2s ease;
+}
+
+.menu button:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--accent);
+    transform: translateX(2px);
+}
+
+.menu .file-menu-container {
+    position: relative;
+}
+
+#fileMenu {
+    position: absolute;
+    left: 60px;
+    top: 0;
+    background: var(--panel);
+    padding: 8px;
+    border-radius: 8px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    min-width: 200px;
+    display: none;
+}
+
+#fileMenu button {
+    width: 100%;
+    height: auto;
+    padding: 10px 12px;
+    text-align: left;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 14px;
+    margin: 2px 0;
+    display: block;
+    justify-content: flex-start;
+}
+
+#fileMenu button:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: none;
+}
+
+.menu input[type=file] {
+    display: none;
+}
+
+.prop {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+    flex-wrap: nowrap;
+    /* keep label + control on one line when space permits */
+    min-width: 0;
+}
+
+/* labels use fixed basis so controls can be uniform */
+.prop label {
+    width: 180px;
+    flex: 0 0 180px;
+    color: var(--muted);
+}
+
+/* unify control widths (text inputs, selects, and custom select wrappers) */
+.prop input[type=text],
+.prop select {
+    flex: 0 0 var(--control-width);
+    width: var(--control-width);
+    max-width: 100%;
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+    color: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+}
+
+/* Custom selects and number inputs: auto-width to fit content */
+.custom-select {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 200px;
+    max-width: 100%;
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+    color: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+    white-space: nowrap;
+}
+
+.prop input[type=number] {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 80px;
+    max-width: 150px;
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+    color: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+}
+
+/* ensure custom-select current fills the wrapper */
+.custom-select .current {
+    width: 100%;
+    box-sizing: border-box;
+    white-space: nowrap;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+    padding: 8px;
+    /* Panels should extend to the fixed status bar; no extra bottom padding so they touch the bar */
+    padding-bottom: 0;
+}
+
+h3 {
+    color: #5ca8d8;
+    margin: 0 0 16px 0;
+}
+
+.tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 0;
+}
+
+.tabs button {
+    padding: 10px 20px;
+    border-radius: 6px 6px 0 0;
+    border: 1px solid transparent;
+    background: rgba(255, 255, 255, 0.02);
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+}
+
+.tabs button:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.tabs button.active {
+    background: var(--panel);
+    color: var(--accent);
+    border-color: rgba(255, 255, 255, 0.1);
+    border-bottom-color: var(--accent);
+}
+
+.main {
+    display: flex;
+    flex: 1;
+    gap: 8px;
+    margin-top: 8px;
+    overflow: hidden;
+    min-height: 0;
+    /* allow children to use flex-basis and scroll */
+}
+
+/* Data model split */
+.split {
+    display: flex;
+    flex: 1;
+    gap: 8px;
+    min-height: 0
+}
+
+.left {
+    width: 360px;
+    min-width: 220px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    /* ensure left panel fills vertical space to touch status bar */
+    flex: 0 0 auto;
+}
+
+.right {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 6px;
+    padding: 12px 12px 6px 12px;
+    /* slightly reduce bottom padding so content visually reaches the status bar */
+    overflow: auto;
+    min-height: 0;
+}
+
+.resizer {
+    width: 6px;
+    cursor: col-resize;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.02), transparent)
+}
+
+/* tree */
+.tree {
+    flex: 1;
+    overflow: auto;
+    padding: 6px;
+    border-radius: 4px;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.02), transparent)
+}
+
+/* make the tree look like a proper foldable tree */
+.child-container {
+    border-left: 1px dashed rgba(255, 255, 255, 0.03);
+    margin-left: 8px;
+    padding-left: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.node {
+    padding: 2px 6px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 2px 0;
+    transition: background 120ms ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.node-wrapper {
+    display: block;
+}
+
+.node:hover:not(.selected) {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.node.selected {
+    background: rgba(0, 122, 204, 0.2);
+    border-left: 3px solid var(--accent);
+    padding-left: 3px;
+}
+
+.node-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.toggle-btn {
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 10px;
+    padding: 0;
+    transform-origin: center;
+    transition: all 0.15s ease;
+}
+
+.toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--accent);
+}
+
+.toggle-spacer {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+}
+
+/* tree */
+.tree {
+    flex: 1;
+    overflow: auto;
+    padding: 6px;
+    border-radius: 4px;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.02), transparent)
+}
+
+/* make the tree look like a proper foldable tree */
+.child-container {
+    border-left: 1px dashed rgba(255, 255, 255, 0.03);
+    margin-left: 8px;
+    padding-left: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow: hidden;
+    transition: height 180ms ease;
+}
+
+.node .meta {
+    font-size: 12px;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap
+}
+
+.node-icon {
+    width: 20px;
+    display: inline-block;
+    text-align: center;
+    margin-right: 6px;
+    font-size: 16px;
+}
+
+.hint {
+    opacity: 0.6;
+    color: var(--muted);
+    padding: 20px;
+    text-align: center
+}
+
+/* stronger selected state handled by .node.selected earlier */
+
+.controls {
+    display: flex;
+    gap: 6px
+}
+
+/* properties */
+.prop {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+}
+
+.prop label {
+    width: 180px;
+    flex: 0 0 180px;
+    color: var(--muted);
+}
+
+.prop input[type=text],
+.prop select {
+    flex: 1;
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+    color: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.prop input[type=number] {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 80px;
+    max-width: 150px;
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+    color: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* Options background/text color */
+.prop select option {
+    background: var(--panel);
+    color: inherit;
+}
+
+/* Keep the expand glyph visible on Windows using ::-ms-expand. */
+.prop select::-ms-expand {
+    /* IE/Edge legacy */
+    filter: invert(1) brightness(0.85);
+}
+
+/* Custom dropdown used for critical selects (dark popup) */
+.custom-select {
+    position: relative;
+    display: inline-block;
+    width: 160px
+}
+
+.custom-select .current {
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+    color: inherit;
+    cursor: pointer
+}
+
+.custom-select .menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 100%;
+    background: var(--panel);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    border-radius: 6px;
+    overflow: hidden
+}
+
+.custom-select .menu .item {
+    padding: 8px 10px;
+    cursor: pointer;
+    color: inherit
+}
+
+.custom-select .menu .item:hover {
+    background: rgba(255, 255, 255, 0.02)
+}
+
+.prop input[type=checkbox] {
+    transform: scale(1.2)
+}
+
+/* default values vertical stack for parameters */
+.defaults-column {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* make default value inputs compact (single-row height) */
+.defaults-column input[type="text"],
+.prop .defaults-column input[type="text"] {
+    padding: 4px 6px !important;
+    height: 28px !important;
+    min-height: 0 !important;
+    max-height: 28px !important;
+    font-size: 13px !important;
+    line-height: 16px !important;
+    box-sizing: border-box;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+}
+
+/* visual state for invalid default values (type/range violations) */
+.defaults-column input.invalid {
+    border-color: rgba(255, 80, 80, 0.9) !important;
+    box-shadow: 0 0 0 3px rgba(255, 80, 80, 0.06) !important;
+    background: rgba(255, 80, 80, 0.02) !important;
+}
+
+/* also ensure textarea-like rules don't affect these inputs in Chrome */
+.defaults-column input[type="text"]::-webkit-input-placeholder {
+    opacity: 0.6
+}
+
+.enum {
+    background: rgba(255, 255, 255, 0.02);
+    padding: 6px;
+    border-radius: 4px
+}
+
+/* platform settings */
+.settings-grid {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 8px;
+    align-items: start;
+}
+
+/* Make platform grid children visually match the .prop layout */
+.settings-grid>div {
+    padding: 6px 0;
+}
+
+.settings-grid>div:nth-child(odd) {
+    color: var(--muted);
+    padding-right: 8px;
+}
+
+.settings-grid>div:nth-child(odd)>div {
+    color: var(--muted);
+}
+
+.settings-grid input[type=text],
+.settings-grid select,
+.settings-grid textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+    color: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.settings-grid input[type=number] {
+    width: auto;
+    min-width: 80px;
+    max-width: 150px;
+    box-sizing: border-box;
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+    color: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.settings-grid textarea {
+    height: 80px;
+    resize: vertical
+}
+
+/* match small toggles/buttons in platform area */
+.settings-grid button {
+    padding: 6px 8px;
+    border-radius: 4px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    color: inherit;
+    cursor: pointer;
+}
+
+/* footer */
+.status {
+    height: 28px;
+    background: var(--panel);
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    font-size: 13px;
+    color: var(--muted);
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 200;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.6);
+}
+
+/* split button */
+.split-button {
+    display: flex;
+    gap: 0;
+}
+
+.split-button-main {
+    flex: 1;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    background: rgba(0, 122, 204, 0.15);
+    border: 1px solid var(--accent);
+    border-right: 0;
+    color: #ddd;
+    padding: 6px 12px;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.split-button-arrow {
+    min-width: 28px;
+    padding: 0 8px;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    font-size: 10px;
+    background: rgba(0, 122, 204, 0.15);
+    border: 1px solid var(--accent);
+    border-left: 0;
+    color: #ddd;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.split-button-arrow:hover {
+    background: rgba(0, 122, 204, 0.25);
+}
+
+.split-button-menu {
+    position: fixed;
+    background: rgba(0, 122, 204, 0.15);
+    padding: 0;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    border: none;
+    display: none;
+    z-index: 999;
+    min-width: 150px;
+}
+
+.split-button-menu button {
+    display: block;
+    width: 100%;
+    height: auto;
+    padding: 8px 12px;
+    text-align: left;
+    background: rgba(0, 122, 204, 0.15);
+    border: 1px solid var(--accent);
+    color: #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    margin: 0;
+}
+
+.split-button-menu button:hover {
+    background: rgba(0, 122, 204, 0.25);
+}
+
+/* context menu */
+.context-menu {
+    position: fixed;
+    background: var(--panel);
+    padding: 6px;
+    border-radius: 6px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
+    display: none;
+    z-index: 999;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.context-menu button {
+    display: block;
+    width: 200px;
+    text-align: left;
+    background: transparent;
+    border: 1px solid transparent;
+    color: inherit;
+    padding: 8px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.context-menu button:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.context-menu button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.context-menu hr {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin: 4px 0;
+}
+
+/* Load/Save buttons styling */
+#loadDataModelBtn,
+#saveDataModelBtn,
+#loadPlatformBtn,
+#savePlatformBtn,
+#loadChecksumBtn,
+#saveChecksumBtn {
+    background: rgba(0, 122, 204, 0.15);
+    border: 1px solid var(--accent);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+#loadDataModelBtn:hover,
+#saveDataModelBtn:hover,
+#loadPlatformBtn:hover,
+#savePlatformBtn:hover,
+#loadChecksumBtn:hover,
+#saveChecksumBtn:hover {
+    background: rgba(0, 122, 204, 0.25);
+    border-color: #50a0e0;
+    box-shadow: 0 0 8px rgba(0, 122, 204, 0.3);
+}
+
+#loadDataModelBtn:active,
+#saveDataModelBtn:active,
+#loadPlatformBtn:active,
+#savePlatformBtn:active {
+    background: rgba(0, 122, 204, 0.35);
+    transform: translateY(1px);
+}
+
+/* small helpers */
+.toolbar {
+    display: flex;
+    gap: 6px;
+    align-items: center
+}
+
+.small-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.small-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+}
+
+.disabled {
+    opacity: 0.4;
+    pointer-events: none
+}
+
+.inline-number {
+    width: 120px
+}
+
+.hex-toggle {
+    padding: 6px 12px;
+    border-radius: 4px;
+    background: #222;
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    color: #fff;
+    cursor: pointer;
+    min-height: 32px;
+    transition: background 0.2s ease;
+}
+
+.hex-toggle.hex-mode {
+    background: rgba(0, 122, 204, 0.3);
+    border-color: rgba(0, 122, 204, 0.5);
+}
+
+.hex-toggle:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* responsive for narrow windows */
+@media (max-width:800px) {
+    .left {
+        width: 260px
+    }
+}

@@ -1,0 +1,12 @@
+.venv_meem/
+x86/
+x64/
+**/build/
+**/debug/
+**/dist/
+**/generated/
+**/report.html
+**/nbproject/private/
+**/nbproject/Makefile*
+**/nbproject/*.bash
+**/__pycache__/
