@@ -1,0 +1,165 @@
+{
+    "name": "Example_PIC16F",
+    "description": "Example EEPROM configuration, demonstrating all kinds of blocks and data types",
+    "children": [
+        {
+            "name": "Block_Basic",
+            "description": "The most used management type",
+            "children": [
+                {
+                    "name": "Param_uint8",
+                    "description": "",
+                    "children": [
+                        {
+                            "name": "Bitfield_0",
+                            "description": null,
+                            "size_in_bits": 1
+                        },
+                        {
+                            "name": "Bitfield_1",
+                            "description": null,
+                            "size_in_bits": 2
+                        }
+                    ],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        186
+                    ]
+                },
+                {
+                    "name": "Param_uint16",
+                    "description": "",
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 2,
+                    "default_value": [
+                        47802,
+                        52938
+                    ]
+                },
+                {
+                    "name": "Param_uint32",
+                    "description": "",
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        3132804810
+                    ]
+                },
+                {
+                    "name": "Param_uint64",
+                    "description": "",
+                    "children": [],
+                    "data_type": 6,
+                    "multiplicity": 1,
+                    "default_value": [
+                        13455294206936006910
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true,
+            "compiler_placement_directive_for_defaults": null,
+            "compiler_placement_attribute_for_defaults": null,
+            "compiler_placement_directive_for_cache": null,
+            "compiler_placement_attribute_for_cache": null
+        },
+        {
+            "name": "Block_BackupCopy",
+            "description": "Increases the data robustness by storing 2 identical instances in the EEPROM",
+            "children": [
+                {
+                    "name": "active_profile_index",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "timestamp",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        4294967295
+                    ]
+                }
+            ],
+            "management_type": 1,
+            "instance_count": 2,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true,
+            "compiler_placement_directive_for_defaults": null,
+            "compiler_placement_attribute_for_defaults": null,
+            "compiler_placement_directive_for_cache": null,
+            "compiler_placement_attribute_for_cache": null
+        },
+        {
+            "name": "Block_MultiProfile",
+            "description": "Implement user profiles easily with multi-profile blocks",
+            "children": [
+                {
+                    "name": "param_0",
+                    "description": null,
+                    "children": [],
+                    "data_type": 8,
+                    "multiplicity": 1,
+                    "default_value": [
+                        11111.111
+                    ]
+                },
+                {
+                    "name": "param_1",
+                    "description": null,
+                    "children": [],
+                    "data_type": 9,
+                    "multiplicity": 1,
+                    "default_value": [
+                        2222222.2222
+                    ]
+                }
+            ],
+            "management_type": 2,
+            "instance_count": 4,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true,
+            "compiler_placement_directive_for_defaults": null,
+            "compiler_placement_attribute_for_defaults": null,
+            "compiler_placement_directive_for_cache": null,
+            "compiler_placement_attribute_for_cache": null
+        },
+        {
+            "name": "Block_WearLeveling",
+            "description": "Suitable for frequent write. The instance count here is the wear reducing factor.",
+            "children": [
+                {
+                    "name": "states_of_mcu_output_pins",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                }
+            ],
+            "management_type": 3,
+            "instance_count": 4,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true,
+            "compiler_placement_directive_for_defaults": null,
+            "compiler_placement_attribute_for_defaults": null,
+            "compiler_placement_directive_for_cache": null,
+            "compiler_placement_attribute_for_cache": null
+        }
+    ],
+    "checksum_size": 1
+}
