@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include <MEEM.h>
+#include "MEEM.h"
 
 /*!
  * \brief AppB works with highly reliable data and expects sudden power loss at any moment, therefore it needs a 'backup copy' block to store its parameters.
@@ -29,8 +29,12 @@ void AppB_Task_10ms(void)
         case 1ul:
             // Expired
             timer = 0ul; // Stop it
+
+            // Generated API: update the parameter's cache only
             MEEM_Set_Block_BackupCopy_timestamp(MEEM_Get_Block_BackupCopy_timestamp() + 0x11111111ul);
-            MEEM_InitiateBlockWrite(MEEM_BLOCK_Block_BackupCopy_ID); // Trigger write immediately here
+
+            // Core API: Trigger the actual write to EEPROM
+            MEEM_InitiateBlockWrite(MEEM_BLOCK_Block_BackupCopy_ID);
             break;
 
         default:

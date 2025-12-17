@@ -34,6 +34,7 @@ static void AppC_BusinessLogic(void)
         // Update the parameters every 10 minutes:
         timer = 0u;
 
+        // Generated API: update the parameters cache only
         MEEM_Set_Block_MultiProfile_param_0(MEEM_Get_Block_MultiProfile_param_0() + 1.1f);
         MEEM_Set_Block_MultiProfile_param_1(MEEM_Get_Block_MultiProfile_param_1() + 2.2f);
     }
@@ -67,19 +68,20 @@ void AppC_Task_10ms(void)
             }
             break;
 
-        case SWITCHING_TO_NEW_PROFILE: {
-                uint8_t active_profile_index = MEEM_Get_Block_BackupCopy_active_profile_index();
-                active_profile_index++;
-                active_profile_index &= 3; // Block_MultiProfile is configured with 4 instances, so the valid indices are [0..3].
-                MEEM_Set_Block_BackupCopy_active_profile_index(active_profile_index);
+        case SWITCHING_TO_NEW_PROFILE:
+        {
+            uint8_t active_profile_index = MEEM_Get_Block_BackupCopy_active_profile_index();
+            active_profile_index++;
+            active_profile_index &= 3; // Block_MultiProfile is configured with 4 instances, so the valid indices are [0..3].
+            MEEM_Set_Block_BackupCopy_active_profile_index(active_profile_index);
 
-                if (!MEEM_InitiateSwitchToProfile(MEEM_BLOCK_Block_MultiProfile_ID, active_profile_index))
-                {
-                    // Not possible now, check why.
-                }
-                switchover_stage = FETCHING_NEW_PROFILE;
+            if (!MEEM_InitiateSwitchToProfile(MEEM_BLOCK_Block_MultiProfile_ID, active_profile_index))
+            {
+                // Not possible now, check why.
             }
-            break;
+            switchover_stage = FETCHING_NEW_PROFILE;
+        }
+        break;
 
         case FETCHING_NEW_PROFILE:
             if (MEEM_IsMultiProfileBlockReady(MEEM_BLOCK_Block_MultiProfile_ID))

@@ -20,6 +20,38 @@ $ cd microeeprommanager
 $ git submodule update --init
 ```
 
+## Project structure
+```
+/
+├── src/                          # mEEM library source code
+│   ├── core/                     # Core EEPROM management logic
+│   ├── provided_interface/       # Public API headers
+│   └── required_interface/       # Interface to be implemented by user (EEPROM access, checksum, callbacks)
+├── test/                         # Unit tests with GoogleTest
+│   ├── meem_config/              # Test configurations
+│   ├── eeprom_simulator/         # EEPROM simulator for testing
+│   └── mocks/                    # Mock implementations
+├── tools/                        # Configuration and utility tools
+│   ├── configurator/             # GUI configuration tool
+│   ├── meem_config_gen/          # Code generator from JSON config
+│   ├── eeprom_image_gen/         # EEPROM binary image generator
+│   └── eeprom_inspector/         # EEPROM binary image inspector
+├── example/                      # Complete integration examples
+│   └── Microchip/
+│       ├── Applications/         # Example application code
+│       ├── CRC/                  # CRC checksum implementation
+│       ├── EEPROM_Driver_PIC16F/ # EEPROM driver implementation
+│       ├── MEEM_Config/          # Example mEEM configuration
+│       └── mEEM-demo.X/          # MPLAB X demo project
+├── doc/                          # Documentation
+│   ├── Configuration.md          # Configuration guide
+│   └── Operation.md              # Detailed operation description
+├── CMakeLists.txt                # CMake build configuration
+├── pyproject.toml                # Python project configuration
+├── requirements.txt              # Python dependencies
+└── setup_venv.{sh,ps1}           # Virtual environment setup scripts
+```
+
 ## Prerequisites
 [Python 3.10](https://www.python.org/downloads/) (or newer) + an [active virtual environment](./setup_venv.sh):  
 **Linux/macOS:**
@@ -47,7 +79,11 @@ The provided API consists of two parts:
 - Core: interface to the *mEEM's* core logic, provided by the [MEEM.h](./src/provided_interface/MEEM.h) header  
 - Generated: project-specific interface, provided by the [MEEM_GenInterface.h](./example/Microchip/MEEM_Config/generated/MEEM_GenInterface.h) header.  
 Since the *mEEM* is useless without the generated interface, *MEEM.h* includes also *MEEM_GenInterface.h*.  
-- Although block caches have public visibility, avoid their direct usage. Prefer the generated getters and setters.    
+- Although block caches have public visibility, avoid their direct usage. Prefer the generated getters and setters:    
+``` bash
+    MEEM_Get_<block-name>_<parameter-name>()
+    MEEM_Set_<block-name>_<parameter-name>(value)
+```
 
 ### 4. Update your make configuration/project:  
 - Add [core *mEEM* files](src/) and include paths  
