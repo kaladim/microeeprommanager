@@ -182,7 +182,7 @@ static void MEEM_TryProcessNextRequest(void)
         {
             if (MEEM_block_status[i].write_pending)
             {
-                MEEM_block_status[i].write_pending   = false; // Clear as early as possible to allow further write requests to be registered
+                MEEM_block_status[i].write_pending   = false; /* Clear as early as possible to allow further write requests to be registered */
                 MEEM_global_status.current_operation = MEEM_OPR_WRITE;
                 MEEM_StartWriteOperationCachedBlock(i);
                 MEEM_OnBlockWriteStarted(i);
@@ -210,7 +210,7 @@ static uint8_t MEEM_GetNextBlockToProcess(void)
 {
     for (uint8_t c = 0; c < MEEM_BLOCK_COUNT; c++)
     {
-        // Always increment the index to ensure every block has a chance to be processed:
+        /* Always increment the index to ensure every block has a chance to be processed: */
         MEEM_global_status.next_block_to_process = MEEM_IncrementAndWrapAround(MEEM_global_status.next_block_to_process, MEEM_BLOCK_COUNT);
         uint8_t i                                = MEEM_global_status.next_block_to_process;
 

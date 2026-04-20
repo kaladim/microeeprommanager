@@ -187,16 +187,16 @@ void MEEM_InitializeWearLevelingBlock(uint8_t block_id)
 uint8_t MEEM_FindIndexOfMostRecentInstance(const uint8_t sequence_counters[], uint8_t instance_count)
 {
     uint8_t sequence_counter_last_valid = INVALID_INSTANCE;
-    uint8_t min                         = 0xFF; // Initial min-max thresholds are intentionally inverted!
-    uint8_t max                         = 0;    // Initial min-max thresholds are intentionally inverted!
+    uint8_t min                         = 0xFF; /* Initial min-max thresholds are intentionally inverted! */
+    uint8_t max                         = 0;    /* Initial min-max thresholds are intentionally inverted! */
     uint8_t min_index                   = INVALID_INDEX;
     uint8_t max_index                   = INVALID_INDEX;
     uint8_t rollover_start_index        = INVALID_INDEX;
     uint8_t rollover_end_index          = INVALID_INDEX;
     uint8_t i                           = 0;
 
-    // Find min, max, rollover region.
-    // Note: the loop must be executed +1 time than the instance_count, this is critically important!
+    /* Find min, max, rollover region. */
+    /* Note: the loop must be executed +1 time than the instance_count, this is critically important! */
     for (uint8_t c = 0; c <= instance_count; c++)
     {
         uint8_t sequence_counter_current = sequence_counters[i];
@@ -213,7 +213,7 @@ uint8_t MEEM_FindIndexOfMostRecentInstance(const uint8_t sequence_counters[], ui
                 max_index = i;
             }
 
-            // Capture the rollover region boundaries
+            /* Capture the rollover region boundaries */
             if ((rollover_start_index == INVALID_INDEX) && (sequence_counter_current < sequence_counter_last_valid) &&
                 ((sequence_counter_last_valid - sequence_counter_current) >= instance_count))
             {
@@ -231,7 +231,7 @@ uint8_t MEEM_FindIndexOfMostRecentInstance(const uint8_t sequence_counters[], ui
         i = MEEM_IncrementAndWrapAround(i, instance_count);
     }
 
-    // Check for at least 1 valid instance:
+    /* Check for at least 1 valid instance: */
     if ((min_index == INVALID_INDEX) || (max_index == INVALID_INDEX))
     {
         return INVALID_INDEX;
@@ -239,10 +239,10 @@ uint8_t MEEM_FindIndexOfMostRecentInstance(const uint8_t sequence_counters[], ui
 
     assert(sequence_counter_last_valid != INVALID_INSTANCE);
 
-    // Check for sequence counter rollover:
+    /* Check for sequence counter rollover: */
     if ((max - min) >= instance_count)
     {
-        // Yep, rollover:
+        /* Yep, rollover: */
         assert((rollover_start_index != INVALID_INDEX) && (rollover_end_index != INVALID_INDEX));
 
         uint8_t length = (rollover_end_index > rollover_start_index) ? (rollover_end_index - rollover_start_index)
@@ -250,6 +250,6 @@ uint8_t MEEM_FindIndexOfMostRecentInstance(const uint8_t sequence_counters[], ui
         return MEEM_FindIndexOfMaxElement(sequence_counters, instance_count, rollover_start_index, length);
     }
 
-    // No rollover, return the max
+    /* No rollover, return the max */
     return max_index;
 }

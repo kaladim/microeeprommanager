@@ -341,7 +341,7 @@ class CodeGen_MEEM(CodeGenerator):
         txt += f"const MEEM_params_{block.name}_t{placement_attribute}  MEEM_defaults_{block.name} = {{\n"
 
         if block.management_type == Block.ManagementTypes.WearLeveling:
-            txt += "    .do_not_use_me = 0,\n"
+            txt += "    /* .do_not_use_me = */ 0,\n"
 
         for param in block.children:
             txt += self.generate_definition_of_defaults_for_parameter(param)
@@ -370,7 +370,7 @@ class CodeGen_MEEM(CodeGenerator):
         return txt
 
     def generate_definition_of_defaults_for_parameter(self, param: Parameter) -> str:
-        txt = f"    .{param.name} = "
+        txt = f"    /* .{param.name} = */ "
 
         if param.multiplicity > 1:
             txt += "{" + "\n"
@@ -379,7 +379,7 @@ class CodeGen_MEEM(CodeGenerator):
                 for i in range(0, param.multiplicity):
                     txt += "        {\n"
                     for bf in param.children:
-                        txt += f"            .{bf.name} = {self.get_default_for_bitfield(param= param, array_index= i, bitfield= bf)},\n"
+                        txt += f"            /* .{bf.name} = */ {self.get_default_for_bitfield(param= param, array_index= i, bitfield= bf)},\n"
 
                     txt = self.remove_last_occurrence_of(",", txt)
                     txt += "        },\n"
@@ -392,7 +392,7 @@ class CodeGen_MEEM(CodeGenerator):
             if len(param.children) > 0:
                 txt += "    {\n"
                 for bf in param.children:
-                    txt += f"        .{bf.name} = {self.get_default_for_bitfield(param= param, array_index= 0, bitfield= bf)},\n"
+                    txt += f"        /* .{bf.name} = */ {self.get_default_for_bitfield(param= param, array_index= 0, bitfield= bf)},\n"
 
                 txt = self.remove_last_occurrence_of(",", txt)
                 txt += "    },\n"
@@ -423,14 +423,14 @@ class CodeGen_MEEM(CodeGenerator):
 
             txt = f"    /* Block '{block.name}' */\n"
             txt += f"    {{\n"
-            txt += f"        .cache = (uint8_t*)&MEEM_cache_{block.name},\n"
-            txt += f"        .defaults = {cast}MEEM_defaults_{block.name},\n"
-            txt += f"        .offset_in_eeprom = {self.to_str(block.offset_in_eeprom)},\n"  # type:ignore
-            txt += f"        .data_size = {block.data_size},\n"
-            txt += f"        .default_pattern_length = {0 if block.default_pattern is None else len(block.default_pattern)},\n"
-            txt += f"        .instance_count = {block.instance_count},\n"
-            txt += f"        .management_type = {str(block.management_type)},\n"
-            txt += f"        .data_recovery_strategy = {str(block.data_recovery_strategy)}\n"
+            txt += f"        /* .cache = */ (uint8_t*)&MEEM_cache_{block.name},\n"
+            txt += f"        /* .defaults = */ {cast}MEEM_defaults_{block.name},\n"
+            txt += f"        /* .offset_in_eeprom = */ {self.to_str(block.offset_in_eeprom)},\n"  # type:ignore
+            txt += f"        /* .data_size = */ {block.data_size},\n"
+            txt += f"        /* .default_pattern_length = */ {0 if block.default_pattern is None else len(block.default_pattern)},\n"
+            txt += f"        /* .instance_count = */ {block.instance_count},\n"
+            txt += f"        /* .management_type = */ {str(block.management_type)},\n"
+            txt += f"        /* .data_recovery_strategy = */ {str(block.data_recovery_strategy)}\n"
             txt += f"    }}"
             configs.append(txt)
 
