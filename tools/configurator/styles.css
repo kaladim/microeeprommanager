@@ -28,7 +28,10 @@ body,
 .app {
     display: flex;
     flex-direction: row;
-    min-height: 100vh;
+    height: 100vh;
+    box-sizing: border-box;
+    /* Reserve space for the fixed status bar so it never overlaps the content above it */
+    padding-bottom: 28px;
 }
 
 /* Vertical menu on the left side */
@@ -234,6 +237,14 @@ h3 {
     /* allow children to use flex-basis and scroll */
 }
 
+/* Highlight a tab area while a file is dragged over it */
+.drag-over {
+    outline: 2px dashed var(--accent);
+    outline-offset: -6px;
+    background: rgba(0, 122, 204, 0.06);
+    border-radius: 6px;
+}
+
 /* Data model split */
 .split {
     display: flex;
@@ -385,8 +396,26 @@ h3 {
     width: 20px;
     display: inline-block;
     text-align: center;
-    margin-right: 6px;
+    margin-right: 0;
     font-size: 16px;
+}
+
+.node[data-type="datamodel"] .node-icon {
+    color: orange;
+    font-size: 28px;
+}
+
+.node[data-type="bitfield"] .node-icon {
+    width: 14px;
+    font-size: 11px;
+}
+
+.node[data-type="bitfield"] .toggle-spacer {
+    width: 10px;
+}
+
+.node[data-type="bitfield"] .node-header {
+    gap: 1px;
 }
 
 .hint {
@@ -608,8 +637,10 @@ h3 {
     background: var(--panel);
     display: flex;
     align-items: center;
+    gap: 8px;
     padding: 0 8px;
-    font-size: 13px;
+    font-family: "Cascadia Code", "Cascadia Mono", "JetBrains Mono", Consolas, "SFMono-Regular", Menlo, monospace;
+    font-size: 12px;
     color: var(--muted);
     position: fixed;
     left: 0;
@@ -617,6 +648,20 @@ h3 {
     bottom: 0;
     z-index: 200;
     box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.status .status-time {
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.5px;
+    flex: none;
+}
+
+.status .status-msg {
+    color: #cfcfcf;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* split button */
