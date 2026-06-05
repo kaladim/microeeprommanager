@@ -237,6 +237,14 @@ h3 {
     /* allow children to use flex-basis and scroll */
 }
 
+/* Highlight a tab area while a file is dragged over it */
+.drag-over {
+    outline: 2px dashed var(--accent);
+    outline-offset: -6px;
+    background: rgba(0, 122, 204, 0.06);
+    border-radius: 6px;
+}
+
 /* Data model split */
 .split {
     display: flex;

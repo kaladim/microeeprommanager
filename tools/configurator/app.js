@@ -731,6 +731,74 @@ document.getElementById('saveChecksumBtn').addEventListener('click', () => {
     saveChecksumParameters();
 });
 
+// --- Drag & drop loading ---------------------------------------------------
+// Each tab's area is a drop zone for its own config type. Dropping a .json onto
+// the visible tab loads it. In Chromium we grab a FileSystemFileHandle from the
+// drop so the file stays writable back to its original location; elsewhere we
+// fall back to a read-only File (first save will then prompt for a destination).
+async function handleDrop(e, key, label, process) {
+    const dt = e.dataTransfer;
+    if (!dt) return;
+
+    // The DataTransfer is only valid synchronously during the event, so capture
+    // the File and the (async) handle promise before any await.
+    let handlePromise = null;
+    let file = null;
+    if (dt.items && dt.items.length) {
+        const item = Array.from(dt.items).find(i => i.kind === 'file');
+        if (item) {
+            if (typeof item.getAsFileSystemHandle === 'function') handlePromise = item.getAsFileSystemHandle();
+            file = item.getAsFile();
+        }
+    }
+    if (!file && dt.files && dt.files.length) file = dt.files[0];
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.json')) { alert('Only .json files can be dropped'); return; }
+
+    let handle = null;
+    if (handlePromise) {
+        try { const h = await handlePromise; if (h && h.kind === 'file') handle = h; } catch (_) { /* no handle -> read-only */ }
+    }
+
+    try {
+        const text = await file.text();
+        process(text, file.name);
+        state.fileHandles[key] = handle;   // writable handle (Chromium) or null
+        state.savedNames[key] = file.name;
+    } catch (err) {
+        alert('Failed to deserialize ' + label + ' JSON:\n' + err.message);
+        setStatus('Failed loading ' + label);
+    }
+}
+
+function setupDropZone(el, key, label, process) {
+    if (!el) return;
+    const hasFile = (e) => e.dataTransfer && Array.from(e.dataTransfer.items || []).some(i => i.kind === 'file');
+    el.addEventListener('dragover', (e) => {
+        if (!hasFile(e)) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+        el.classList.add('drag-over');
+    });
+    el.addEventListener('dragleave', (e) => {
+        // Ignore leaving for a child element still inside the zone
+        if (!el.contains(e.relatedTarget)) el.classList.remove('drag-over');
+    });
+    el.addEventListener('drop', (e) => {
+        e.preventDefault();
+        el.classList.remove('drag-over');
+        handleDrop(e, key, label, process);
+    });
+}
+
+setupDropZone(document.getElementById('dataArea'), 'dataModel', 'data model', processDataModelText);
+setupDropZone(document.getElementById('platformArea'), 'platform', 'platform settings', processPlatformText);
+setupDropZone(document.getElementById('checksumArea'), 'checksum', 'checksum settings', processChecksumText);
+
+// Stop the browser from navigating away if a file is dropped outside a zone.
+window.addEventListener('dragover', (e) => { if (e.dataTransfer && Array.from(e.dataTransfer.items || []).some(i => i.kind === 'file')) e.preventDefault(); });
+window.addEventListener('drop', (e) => { if (e.dataTransfer && Array.from(e.dataTransfer.items || []).some(i => i.kind === 'file')) e.preventDefault(); });
+
 // Split button dropdown handlers
 function setupSplitButton(menuBtnId, saveFunc, saveAsFunc) {
     const menuBtn = document.getElementById(menuBtnId);
