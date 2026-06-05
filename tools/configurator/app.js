@@ -63,6 +63,12 @@ let state = {
     checksumSettings: null, // Checksum settings object
     checksumTypeHints: {}, // Type hints for checksum parameters (to distinguish float from int)
     savedNames: { dataModel: null, platform: null, checksum: null },
+    // FileSystemFileHandle for each config when loaded via the File System Access API.
+    // Holding the handle lets us write straight back to the file's original on-disk location.
+    fileHandles: { dataModel: null, platform: null, checksum: null },
+    // Optional directory handle the user has granted; lets the status bar show a
+    // path relative to it. Browsers never expose absolute filesystem paths to a page.
+    rootDirHandle: null,
     isSavedAs: false,
     lastStatus: '',
     // paths (JSON.stringify(path)) for which child containers are collapsed
@@ -70,7 +76,18 @@ let state = {
 };
 
 function nowTS() { const d = new Date(); return d.toTimeString().slice(0, 8) }
-function setStatus(msg) { state.lastStatus = msg; document.getElementById('status').textContent = `${nowTS()} ${msg}` }
+function setStatus(msg) {
+    state.lastStatus = msg;
+    const el = document.getElementById('status');
+    el.textContent = '';
+    const time = document.createElement('span');
+    time.className = 'status-time';
+    time.textContent = nowTS();
+    const text = document.createElement('span');
+    text.className = 'status-msg';
+    text.textContent = msg;
+    el.append(time, text);
+}
 
 // Utility: deep clone
 // Helper: Create context menu button
@@ -362,20 +379,81 @@ openDataModelInput.addEventListener('change', handleOpenDataModel)
 openPlatformInput.addEventListener('change', handleOpenPlatform)
 openChecksumInput.addEventListener('change', handleOpenChecksum)
 
-function handleOpenDataModel(e) {
+// --- File System Access API helpers ---------------------------------------
+// Chromium browsers (Chrome/Edge) expose showOpenFilePicker/showSaveFilePicker,
+// which hand us a FileSystemFileHandle we can later write back to. Firefox/Safari
+// don't, so every entry point degrades gracefully to the legacy <input>/download path.
+function supportsFSA() { return typeof window.showOpenFilePicker === 'function' && typeof window.showSaveFilePicker === 'function'; }
+
+const JSON_PICKER_TYPES = [{ description: 'JSON file', accept: { 'application/json': ['.json'] } }];
+
+// Parse/validate handlers, decoupled from how the text was obtained (picker or <input>).
+function processDataModelText(text, name) {
+    const raw = JSON.parse(text);
+    state.dataModel = raw;
+    restoreNumericTypesAfterLoad(state.dataModel);
+    validateDataModelLoad();
+    collapseAllBlocks();
+    renderTree();
+    setStatus('Loaded data model file: ' + name);
+}
+
+function processPlatformText(text, name) {
+    const raw = JSON.parse(text);
+    state.platformSettings = raw;
+    restoreNumericTypesAfterLoad(state.platformSettings);
+    validatePlatformLoad();
+    setStatus('Loaded platform settings file: ' + name);
+    renderPlatformSettings();
+}
+
+function processChecksumText(text, name) {
+    const raw = JSON.parse(text);
+    state.checksumSettings = raw;
+    restoreNumericTypesAfterLoad(state.checksumSettings);
+    setStatus('Loaded checksum settings file: ' + name);
+    renderChecksum();
+}
+
+// Generic load: prefer the File System Access picker (so we capture a writable
+// handle for save-back); otherwise fall back to the hidden <input type=file>.
+async function loadConfig(key, label, process, inputEl) {
+    if (supportsFSA()) {
+        let handle;
+        try {
+            [handle] = await window.showOpenFilePicker({ types: JSON_PICKER_TYPES, multiple: false, excludeAcceptAllOption: false });
+        } catch (err) {
+            if (err && err.name === 'AbortError') return; // user dismissed the picker
+            // Picker unavailable for some reason -> fall back to the input element
+            inputEl.click();
+            return;
+        }
+        try {
+            const file = await handle.getFile();
+            const text = await file.text();
+            process(text, handle.name);
+            // Only remember the origin once parsing/validation succeeded
+            state.fileHandles[key] = handle;
+            state.savedNames[key] = handle.name;
+        } catch (err) {
+            alert('Failed to deserialize ' + label + ' JSON:\n' + err.message);
+            setStatus('Failed loading ' + label);
+        }
+    } else {
+        inputEl.click();
+    }
+}
+
+// Legacy <input> handlers (fallback path). A file loaded this way has no handle,
+// so the first save will prompt for a destination.
+function handleOpenViaInput(e, key, label, process) {
     const f = e.target.files[0]; if (!f) return; if (!f.name.endsWith('.json')) { alert('Only .json allowed'); return }
     const reader = new FileReader(); reader.onload = () => {
         try {
-            const raw = JSON.parse(reader.result);
-            // restore numeric types (including BigInt markers) into the live model
-            state.dataModel = raw;
-            restoreNumericTypesAfterLoad(state.dataModel);
-            validateDataModelLoad();
-            // Collapse all blocks on load
-            collapseAllBlocks();
-            renderTree();
-            setStatus('Loaded data model file: ' + f.name)
-        } catch (err) { alert('Failed to deserialize data model JSON:\n' + err.message); setStatus('Failed loading data model') }
+            process(reader.result, f.name);
+            state.fileHandles[key] = null;
+            state.savedNames[key] = f.name;
+        } catch (err) { alert('Failed to deserialize ' + label + ' JSON:\n' + err.message); setStatus('Failed loading ' + label) }
         finally {
             // Reset input value so the same file can be loaded again
             e.target.value = '';
@@ -384,40 +462,9 @@ function handleOpenDataModel(e) {
     reader.readAsText(f)
 }
 
-function handleOpenPlatform(e) {
-    const f = e.target.files[0]; if (!f) return; if (!f.name.endsWith('.json')) { alert('Only .json allowed'); return }
-    const reader = new FileReader(); reader.onload = () => {
-        try {
-            const raw = JSON.parse(reader.result);
-            state.platformSettings = raw;
-            // coerce numeric-looking fields back to Number/BigInt
-            restoreNumericTypesAfterLoad(state.platformSettings);
-            validatePlatformLoad(); setStatus('Loaded platform settings file: ' + f.name); renderPlatformSettings()
-        } catch (err) { alert('Failed to deserialize platform settings JSON:\n' + err.message); setStatus('Failed loading platform settings') }
-        finally {
-            // Reset input value so the same file can be loaded again
-            e.target.value = '';
-        }
-    }
-    reader.readAsText(f)
-}
-
-function handleOpenChecksum(e) {
-    const f = e.target.files[0]; if (!f) return; if (!f.name.endsWith('.json')) { alert('Only .json allowed'); return }
-    const reader = new FileReader(); reader.onload = () => {
-        try {
-            const raw = JSON.parse(reader.result);
-            state.checksumSettings = raw;
-            restoreNumericTypesAfterLoad(state.checksumSettings);
-            setStatus('Loaded checksum settings file: ' + f.name); renderChecksum()
-        } catch (err) { alert('Failed to deserialize checksum settings JSON:\n' + err.message); setStatus('Failed loading checksum settings') }
-        finally {
-            // Reset input value so the same file can be loaded again
-            e.target.value = '';
-        }
-    }
-    reader.readAsText(f)
-}
+function handleOpenDataModel(e) { handleOpenViaInput(e, 'dataModel', 'data model', processDataModelText); }
+function handleOpenPlatform(e) { handleOpenViaInput(e, 'platform', 'platform settings', processPlatformText); }
+function handleOpenChecksum(e) { handleOpenViaInput(e, 'checksum', 'checksum settings', processChecksumText); }
 
 function validateDataModelLoad() {
     try {
@@ -660,7 +707,7 @@ function renderErrorPanel(errors) {
 
 // Wire up new Load/Save buttons in panels
 document.getElementById('loadDataModelBtn').addEventListener('click', () => {
-    openDataModelInput.click();
+    loadConfig('dataModel', 'data model', processDataModelText, openDataModelInput);
 });
 
 document.getElementById('saveDataModelBtn').addEventListener('click', () => {
@@ -669,7 +716,7 @@ document.getElementById('saveDataModelBtn').addEventListener('click', () => {
 });
 
 document.getElementById('loadPlatformBtn').addEventListener('click', () => {
-    openPlatformInput.click();
+    loadConfig('platform', 'platform settings', processPlatformText, openPlatformInput);
 });
 
 document.getElementById('savePlatformBtn').addEventListener('click', () => {
@@ -677,7 +724,7 @@ document.getElementById('savePlatformBtn').addEventListener('click', () => {
 });
 
 document.getElementById('loadChecksumBtn').addEventListener('click', () => {
-    openChecksumInput.click();
+    loadConfig('checksum', 'checksum settings', processChecksumText, openChecksumInput);
 });
 
 document.getElementById('saveChecksumBtn').addEventListener('click', () => {
@@ -761,26 +808,13 @@ function bigintReplacer(key, value) {
     return value;
 }
 
-function saveDataModel() {
-    if (!state.savedNames.dataModel) {
-        const dmName = prompt('File name for exported data model', 'data_model.json');
-        if (!dmName) return;
-        state.savedNames.dataModel = dmName;
-    }
-    const dmStr = JSON.stringify(state.dataModel, bigintReplacer, 4);
-    const dmBlob = new Blob([dmStr], { type: 'application/json' });
-    downloadBlob(dmBlob, state.savedNames.dataModel);
-    setStatus('Saved data model: ' + state.savedNames.dataModel);
-}
+// --- Serialization (independent of the destination) -----------------------
+// Use a replacer to serialize BigInt as decimal strings so JSON.stringify doesn't
+// throw and round-trip is preserved. NaN floats are serialized as the string "NaN".
+function serializeDataModel() { return JSON.stringify(state.dataModel, bigintReplacer, 4); }
+function serializeChecksum() { return JSON.stringify(state.checksumSettings, bigintReplacer, 4); }
 
-function savePlatformSettings() {
-    if (!state.platformSettings) { alert('No platform settings to save'); return; }
-    if (!state.savedNames.platform) {
-        const psName = prompt('File name for exported platform settings', 'platform_settings.json');
-        if (!psName) return;
-        state.savedNames.platform = psName;
-    }
-
+function serializePlatform() {
     // Normalize page_aligned_blocks before saving
     const platformCopy = JSON.parse(JSON.stringify(state.platformSettings, bigintReplacer));
 
@@ -811,100 +845,104 @@ function savePlatformSettings() {
         }
     }
 
-    const psStr = JSON.stringify(platformCopy, null, 4);
-    const psBlob = new Blob([psStr], { type: 'application/json' });
-    downloadBlob(psBlob, state.savedNames.platform);
-    setStatus('Saved platform settings: ' + state.savedNames.platform);
+    return JSON.stringify(platformCopy, null, 4);
 }
 
-function saveChecksumParameters() {
-    if (!state.checksumSettings) { alert('No checksum parameters to save'); return; }
-    if (!state.savedNames.checksum) {
-        const csName = prompt('File name for exported checksum parameters', 'checksum_parameters.json');
-        if (!csName) return;
-        state.savedNames.checksum = csName;
-    }
-    const csStr = JSON.stringify(state.checksumSettings, bigintReplacer, 4);
-    const csBlob = new Blob([csStr], { type: 'application/json' });
-    downloadBlob(csBlob, state.savedNames.checksum);
-    setStatus('Saved checksum settings: ' + state.savedNames.checksum);
-}
+// Per-config descriptors used by the generic save routine.
+const CONFIG_DEFS = {
+    dataModel: { getData: () => state.dataModel, serialize: serializeDataModel, defaultName: 'data_model.json', label: 'data model' },
+    platform: { getData: () => state.platformSettings, serialize: serializePlatform, defaultName: 'platform_settings.json', label: 'platform settings' },
+    checksum: { getData: () => state.checksumSettings, serialize: serializeChecksum, defaultName: 'checksum_parameters.json', label: 'checksum parameters' },
+};
 
-function saveDataModelAs() {
-    if (!state.dataModel) { alert('No data model to save'); return; }
-    const dmName = prompt('File name for exported data model', state.savedNames.dataModel || 'data_model.json');
-    if (!dmName) return;
-    state.savedNames.dataModel = dmName;
-    saveDataModel();
-}
-
-function savePlatformSettingsAs() {
-    if (!state.platformSettings) { alert('No platform settings to save'); return; }
-    const psName = prompt('File name for exported platform settings', state.savedNames.platform || 'platform_settings.json');
-    if (!psName) return;
-    state.savedNames.platform = psName;
-    savePlatformSettings();
-}
-
-function saveChecksumParametersAs() {
-    if (!state.checksumSettings) { alert('No checksum parameters to save'); return; }
-    const csName = prompt('File name for exported checksum parameters', state.savedNames.checksum || 'checksum_parameters.json');
-    if (!csName) return;
-    state.savedNames.checksum = csName;
-    saveChecksumParameters();
-}
-
-function saveAs() { // create two files using download links
-    const dmName = prompt('File name for exported data model', state.savedNames.dataModel || 'data_model.json');
-    if (!dmName) return;
-    const psName = prompt('File name for exported platform settings', state.savedNames.platform || 'platform_settings.json');
-    if (!psName) return;
-    state.savedNames.dataModel = dmName; state.savedNames.platform = psName; state.isSavedAs = true;
-    save();
-}
-
-function save() {
-    if (!state.isSavedAs) { alert('Use Save as... first'); return }
-    // Use a replacer to serialize BigInt as decimal strings so JSON.stringify doesn't throw and round-trip is preserved.
-    // Also serialize NaN as the string "NaN" for float parameters
-    const dmStr = JSON.stringify(state.dataModel, bigintReplacer, 4);
-
-    // Normalize page_aligned_blocks before saving
-    const platformCopy = JSON.parse(JSON.stringify(state.platformSettings, bigintReplacer));
-
-    // Get all block names from data model
-    const allBlockNames = (state.dataModel && state.dataModel.children)
-        ? state.dataModel.children.map(block => block.name || '').filter(name => name)
-        : [];
-
-    if (allBlockNames.length > 0) {
-        const alignedBlocks = platformCopy.page_aligned_blocks || [];
-        const hasWildcard = alignedBlocks.includes('*');
-
-        // Build the actual list of aligned blocks (resolve wildcard if present)
-        let actualAlignedBlocks = [];
-        if (hasWildcard) {
-            actualAlignedBlocks = [...allBlockNames];
-        } else {
-            actualAlignedBlocks = alignedBlocks.filter(name => allBlockNames.includes(name));
+// Write text straight into a FileSystemFileHandle's original on-disk location,
+// requesting readwrite permission first (the browser may prompt once per file).
+async function writeToHandle(handle, text) {
+    if (handle.queryPermission) {
+        const opts = { mode: 'readwrite' };
+        if (await handle.queryPermission(opts) !== 'granted') {
+            if (await handle.requestPermission(opts) !== 'granted') {
+                throw new Error('Write permission was not granted');
+            }
         }
+    }
+    const writable = await handle.createWritable();
+    await writable.write(text);
+    await writable.close();
+}
 
-        // Determine what to save
-        if (actualAlignedBlocks.length === allBlockNames.length) {
-            // All blocks are aligned - save as wildcard
-            platformCopy.page_aligned_blocks = ['*'];
-        } else {
-            // Some blocks are not aligned - save explicit list
-            platformCopy.page_aligned_blocks = actualAlignedBlocks;
+// Generic save. Order of preference:
+//   1. We already hold a handle for this config (loaded/saved earlier) -> overwrite
+//      its original location silently. This is the "Save"/Ctrl+S happy path.
+//   2. File System Access available but no handle yet (new config, or loaded via the
+//      legacy input) -> showSaveFilePicker so the user picks the location once; remember it.
+//   3. No File System Access API at all -> download to the browser's Downloads folder.
+// saveAs=true forces step 2/3 (always ask for a new destination).
+async function saveConfig(key, { saveAs = false } = {}) {
+    const def = CONFIG_DEFS[key];
+    if (!def.getData()) { alert('No ' + def.label + ' to save'); return; }
+    const text = def.serialize();
+
+    const handle = saveAs ? null : state.fileHandles[key];
+    if (handle) {
+        try {
+            await writeToHandle(handle, text);
+            setStatus('Saved ' + def.label + ' → ' + await handlePath(handle));
+            return;
+        } catch (err) {
+            // File moved, permission revoked, etc. -> fall through to ask for a destination.
+            console.warn('Direct save to original location failed, falling back:', err);
         }
     }
 
-    const psStr = JSON.stringify(platformCopy, null, 4);
-    const dmBlob = new Blob([dmStr], { type: 'application/json' });
-    const psBlob = new Blob([psStr], { type: 'application/json' });
-    downloadBlob(dmBlob, state.savedNames.dataModel); downloadBlob(psBlob, state.savedNames.platform);
-    setStatus('Saved configuration (BigInt serialized as strings)')
+    if (supportsFSA()) {
+        try {
+            const newHandle = await window.showSaveFilePicker({
+                suggestedName: state.savedNames[key] || def.defaultName,
+                types: JSON_PICKER_TYPES,
+            });
+            await writeToHandle(newHandle, text);
+            state.fileHandles[key] = newHandle;
+            state.savedNames[key] = newHandle.name;
+            setStatus('Saved ' + def.label + ' → ' + await handlePath(newHandle));
+            return;
+        } catch (err) {
+            if (err && err.name === 'AbortError') return; // user cancelled the dialog
+            console.warn('showSaveFilePicker failed, falling back to download:', err);
+        }
+    }
+
+    // Legacy download fallback (Firefox/Safari, or picker unavailable).
+    if (saveAs || !state.savedNames[key]) {
+        const name = prompt('File name for exported ' + def.label, state.savedNames[key] || def.defaultName);
+        if (!name) return;
+        state.savedNames[key] = name;
+    }
+    downloadBlob(new Blob([text], { type: 'application/json' }), state.savedNames[key]);
+    setStatus('Saved ' + def.label + ' → ' + state.savedNames[key] + ' (browser Downloads folder)');
 }
+
+// Best path string a browser will surface for a saved file. Browsers sandbox the
+// real filesystem and never hand a web page the absolute directory of a picked
+// file, so this resolves to the file name (optionally with a sub-path relative to
+// a directory the user has explicitly granted, if one was ever stored).
+async function handlePath(handle) {
+    if (state.rootDirHandle && state.rootDirHandle.resolve) {
+        try {
+            const rel = await state.rootDirHandle.resolve(handle);
+            if (rel) return state.rootDirHandle.name + '/' + rel.join('/');
+        } catch (_) { /* not under the granted root; fall back to name */ }
+    }
+    return handle.name;
+}
+
+function saveDataModel() { return saveConfig('dataModel'); }
+function savePlatformSettings() { return saveConfig('platform'); }
+function saveChecksumParameters() { return saveConfig('checksum'); }
+function saveDataModelAs() { return saveConfig('dataModel', { saveAs: true }); }
+function savePlatformSettingsAs() { return saveConfig('platform', { saveAs: true }); }
+function saveChecksumParametersAs() { return saveConfig('checksum', { saveAs: true }); }
+
 function downloadBlob(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); }
 
 // New actions: removed top toolbar creation buttons to rely on context menu per spec
@@ -1049,9 +1087,9 @@ function createNodeElement(type, obj, path) {
     // add small icon for node type
     const icon = document.createElement('span'); icon.className = 'node-icon';
     if (type === 'datamodel') icon.textContent = '📦';
-    else if (type === 'block') icon.textContent = '📋';
-    else if (type === 'parameter') icon.textContent = '🔧';
-    else icon.textContent = '🔹';
+    else if (type === 'block') icon.textContent = '🧱';
+    else if (type === 'parameter') icon.textContent = '🎛️';
+    else icon.textContent = '🚩';
     header.insertBefore(icon, header.firstChild);
 
     header.appendChild(right);
@@ -2479,26 +2517,38 @@ document.getElementById('tabChecksum').addEventListener('click', () => {
     renderChecksum();
 })
 
+// Which config the currently active tab corresponds to.
+function activeConfigKey() {
+    if (document.getElementById('tabPlatform').classList.contains('active')) return 'platform';
+    if (document.getElementById('tabChecksum').classList.contains('active')) return 'checksum';
+    return 'dataModel';
+}
+
 // keyboard shortcuts
 window.addEventListener('keydown', (e) => {
     if (e.ctrlKey && e.key === 'o') {
         e.preventDefault();
         // Open based on active tab
-        if (document.getElementById('tabPlatform').classList.contains('active')) {
-            openPlatformInput.click();
-        } else {
-            openDataModelInput.click();
-        }
+        const key = activeConfigKey();
+        if (key === 'platform') loadConfig('platform', 'platform settings', processPlatformText, openPlatformInput);
+        else if (key === 'checksum') loadConfig('checksum', 'checksum settings', processChecksumText, openChecksumInput);
+        else loadConfig('dataModel', 'data model', processDataModelText, openDataModelInput);
     }
-    if (e.ctrlKey && e.key === 's' && e.shiftKey) { e.preventDefault(); saveAs(); }
+    if (e.ctrlKey && e.key === 's' && e.shiftKey) {
+        e.preventDefault();
+        // Save As based on active tab
+        const key = activeConfigKey();
+        if (key === 'platform') savePlatformSettingsAs();
+        else if (key === 'checksum') saveChecksumParametersAs();
+        else saveDataModelAs();
+    }
     else if (e.ctrlKey && e.key === 's') {
         e.preventDefault();
-        // Save based on active tab
-        if (document.getElementById('tabPlatform').classList.contains('active')) {
-            savePlatformSettings();
-        } else {
-            if (state.dataModel) saveDataModel();
-        }
+        // Save (back to original location) based on active tab
+        const key = activeConfigKey();
+        if (key === 'platform') savePlatformSettings();
+        else if (key === 'checksum') saveChecksumParameters();
+        else if (state.dataModel) saveDataModel();
     }
     if (e.key === 'Delete' && selectedPath) { deleteNodeAtPath(selectedPath); renderTree(); }
     // Move node up/down with Shift+Arrow keys
