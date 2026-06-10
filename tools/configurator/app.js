@@ -876,11 +876,33 @@ function bigintReplacer(key, value) {
     return value;
 }
 
+// Serialize an object to JSON while emitting BigInt values as bare number
+// literals (e.g. 186) instead of quoted strings. Integer values are kept as
+// BigInt internally to preserve full 64-bit precision, but JSON.stringify cannot
+// output BigInt directly, so each one is wrapped in a NUL-delimited sentinel and
+// the quotes the serializer adds around it are stripped afterwards. NUL chars can
+// never appear unescaped in JSON output, so the sentinel cannot collide with real
+// string data. NaN floats are still emitted as the string "NaN" (JSON has no NaN).
+function stringifyConfig(obj, space) {
+    const bigints = [];
+    const json = JSON.stringify(obj, (key, value) => {
+        if (typeof value === 'bigint') {
+            const token = `\u0000BIGINT${bigints.length}\u0000`;
+            bigints.push(value.toString());
+            return token;
+        }
+        if (typeof value === 'number' && isNaN(value)) return "NaN";
+        return value;
+    }, space);
+    return json.replace(/"\\u0000BIGINT(\d+)\\u0000"/g, (m, i) => bigints[Number(i)]);
+}
+
 // --- Serialization (independent of the destination) -----------------------
-// Use a replacer to serialize BigInt as decimal strings so JSON.stringify doesn't
-// throw and round-trip is preserved. NaN floats are serialized as the string "NaN".
-function serializeDataModel() { return JSON.stringify(state.dataModel, bigintReplacer, 4); }
-function serializeChecksum() { return JSON.stringify(state.checksumSettings, bigintReplacer, 4); }
+// Integer values are kept as BigInt internally; stringifyConfig emits them as
+// JSON numbers so e.g. parameter default_value arrays round-trip as integers,
+// not strings. NaN floats are serialized as the string "NaN".
+function serializeDataModel() { return stringifyConfig(state.dataModel, 4); }
+function serializeChecksum() { return stringifyConfig(state.checksumSettings, 4); }
 
 function serializePlatform() {
     // Normalize page_aligned_blocks before saving
