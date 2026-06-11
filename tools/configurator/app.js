@@ -1150,6 +1150,8 @@ function collapseNodeRecursively(path, type) {
 function createNodeElement(type, obj, path) {
     const wrapper = document.createElement('div'); wrapper.className = 'node-wrapper';
     const div = document.createElement('div'); div.className = 'node'; div.tabIndex = 0; div.dataset.path = JSON.stringify(path); div.dataset.type = type;
+    const pathKey = JSON.stringify(path);
+    const isCollapsed = state.collapsedPaths.has(pathKey);
     const header = document.createElement('div'); header.className = 'node-header';
     // title/meta column
     const left = document.createElement('div'); left.style.display = 'flex'; left.style.flexDirection = 'column'; left.style.minWidth = '0';
@@ -1161,8 +1163,6 @@ function createNodeElement(type, obj, path) {
     const canHaveChildren = (type === 'datamodel' || type === 'block' || type === 'parameter');
     if (canHaveChildren) {
         const toggle = document.createElement('button'); toggle.className = 'toggle-btn';
-        const pathKey = JSON.stringify(path);
-        const isCollapsed = state.collapsedPaths.has(pathKey);
         // caret: right-pointing when collapsed, down when expanded
         toggle.textContent = isCollapsed ? '\u25B6' : '\u25BC'; toggle.title = isCollapsed ? 'Expand children' : 'Collapse children';
         toggle.addEventListener('click', (ev) => { ev.stopPropagation(); animateToggle(path); });
@@ -1176,10 +1176,10 @@ function createNodeElement(type, obj, path) {
     // attach header and right controls to the node
     // add small icon for node type
     const icon = document.createElement('span'); icon.className = 'node-icon';
-    if (type === 'datamodel') icon.textContent = '📦';
-    else if (type === 'block') icon.textContent = '🧱';
-    else if (type === 'parameter') icon.textContent = '🎛️';
-    else icon.textContent = '🚩';
+    if (type === 'datamodel') icon.textContent = '🗄';
+    else if (type === 'block') icon.textContent = isCollapsed ? '📁' : '📂';
+    else if (type === 'parameter') icon.textContent = '📄';
+    else icon.textContent = '🔵';
     header.insertBefore(icon, header.firstChild);
 
     header.appendChild(right);
@@ -1281,6 +1281,10 @@ function animateToggle(path) {
     }
     // update caret glyph
     const btn = wrapper.querySelector('.toggle-btn'); if (btn) btn.textContent = wasCollapsed ? '\u25BC' : '\u25B6';
+    const icon = wrapper.querySelector('.node-icon');
+    if (icon && nodeEl.dataset.type === 'block') {
+        icon.textContent = wasCollapsed ? '📂' : '📁';
+    }
 }
 
 function getNodeAtPath(path) { if (!state.dataModel) return null; if (!path || path.length === 0) return state.dataModel; let cur = state.dataModel; for (let i = 0; i < path.length; i++) { cur = cur.children[path[i]]; } return cur }

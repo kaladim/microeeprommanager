@@ -396,8 +396,26 @@ h3 {
     width: 20px;
     display: inline-block;
     text-align: center;
-    margin-right: 6px;
+    margin-right: 0;
     font-size: 16px;
+}
+
+.node[data-type="datamodel"] .node-icon {
+    color: orange;
+    font-size: 28px;
+}
+
+.node[data-type="bitfield"] .node-icon {
+    width: 14px;
+    font-size: 11px;
+}
+
+.node[data-type="bitfield"] .toggle-spacer {
+    width: 10px;
+}
+
+.node[data-type="bitfield"] .node-header {
+    gap: 1px;
 }
 
 .hint {
