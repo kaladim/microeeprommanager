@@ -1214,7 +1214,8 @@ function createNodeElement(type, obj, path) {
 }
 
 let selectedPath = null; let selectedType = null;
-function selectNode(path, type) {
+function selectNode(path, type, options = {}) {
+    const { focusNode = false } = options;
     // auto-expand ancestors so the selected node is visible
     const ancestors = ancestorPaths(path);
     for (const a of ancestors) state.collapsedPaths.delete(JSON.stringify(a));
@@ -1227,7 +1228,9 @@ function selectNode(path, type) {
     for (const n of nodes) {
         if (n.dataset.path === JSON.stringify(path)) {
             n.classList.add('selected'); // ensure it's scrolled into view
-            n.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); break
+            n.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            if (focusNode) n.focus({ preventScroll: true });
+            break
         }
     }
     renderProps();
@@ -1314,7 +1317,7 @@ function moveNodeUp(path) {
     newPath[newPath.length - 1] = idx - 1;
 
     setStatus('Node moved up');
-    selectNode(newPath, selectedType);
+    selectNode(newPath, selectedType, { focusNode: true });
 }
 
 function moveNodeDown(path) {
@@ -1341,7 +1344,7 @@ function moveNodeDown(path) {
     newPath[newPath.length - 1] = idx + 1;
 
     setStatus('Node moved down');
-    selectNode(newPath, selectedType);
+    selectNode(newPath, selectedType, { focusNode: true });
 }
 
 // Context menu logic
@@ -1360,7 +1363,7 @@ treeEl.addEventListener('click', (e) => {
 
     const path = JSON.parse(node.dataset.path || '[]');
     const type = node.dataset.type;
-    selectNode(path, type);
+    selectNode(path, type, { focusNode: true });
 });
 
 treeEl.addEventListener('keydown', (e) => {
@@ -2639,16 +2642,6 @@ window.addEventListener('keydown', (e) => {
         if (key === 'platform') savePlatformSettings();
         else if (key === 'checksum') saveChecksumParameters();
         else if (state.dataModel) saveDataModel();
-    }
-    if (e.key === 'Delete' && selectedPath) { deleteNodeAtPath(selectedPath); renderTree(); }
-    // Move node up/down with Shift+Arrow keys
-    if (e.shiftKey && e.key === 'ArrowUp' && selectedPath) {
-        e.preventDefault();
-        moveNodeUp(selectedPath);
-    }
-    if (e.shiftKey && e.key === 'ArrowDown' && selectedPath) {
-        e.preventDefault();
-        moveNodeDown(selectedPath);
     }
     // Close file menu when Escape is pressed
     if (e.key === 'Escape') {
