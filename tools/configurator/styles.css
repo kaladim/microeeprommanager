@@ -574,6 +574,53 @@ h3 {
     align-items: start;
 }
 
+/* foldable platform settings sections */
+.platform-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.settings-section {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.settings-section>summary {
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    padding: 10px 12px;
+    font-weight: 600;
+    border-radius: 6px;
+}
+
+.settings-section>summary::-webkit-details-marker {
+    display: none;
+}
+
+.settings-section>summary::before {
+    content: '\25B6';
+    display: inline-block;
+    margin-right: 8px;
+    font-size: 0.75em;
+    transition: transform 0.15s ease;
+    color: var(--muted);
+}
+
+.settings-section[open]>summary::before {
+    transform: rotate(90deg);
+}
+
+.settings-section>summary:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.settings-section-body {
+    padding: 4px 12px 12px;
+}
+
 /* Make platform grid children visually match the .prop layout */
 .settings-grid>div {
     padding: 6px 0;

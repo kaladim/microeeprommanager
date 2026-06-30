@@ -74,6 +74,10 @@ Make sure your favorite web browser has enabled `JavaScript` and simply open the
     - `attribute_for_defaults` (string, optional): You may use either an attribute or a directive, but never both at the same time
     - `directive_for_cache` (string, optional): In some situations, you may need special placement of the cache.
     - `attribute_for_cache` (string, optional): You may use either an attribute or a directive, but never both at the same time
+- `code_gen_settings` (dict): settings that control the style of the generated code:
+  - `language_standard` (enum): C standard used for `const` object initializations. `c99` uses designated initializers (e.g. `.field = value`), `c90` uses positional initializers only. Default: `c90`.
+  - `accessor_style` (enum): style of the generated parameter accessors (getters/setters). `inline_functions` generates `static inline` getters/setters, `macros` generates preprocessor macros. Default: `inline_functions`.
+  - `cache_layout` (enum): layout of the parameter cache objects. `granular` generates one cache struct per block, `monolith` aggregates all blocks into one large struct. Default: `granular`.
 
 # Checksum parameters
 - `algo` (string): name of the checksum algorithm. **This is the only mandatory field.**  

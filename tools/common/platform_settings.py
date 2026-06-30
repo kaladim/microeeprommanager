@@ -54,6 +54,28 @@ class CompilerDirectives:
         """Block-scoped placement directives. The keys are block names as defined in the datamodel."""
 
 
+class CodeGenSettings:
+    """Settings that control the style of the generated code."""
+
+    def __init__(
+        self,
+        language_standard: Literal["c90", "c99"] = "c90",
+        accessor_style: Literal["macros", "inline_functions"] = "inline_functions",
+        cache_layout: Literal["granular", "monolith"] = "granular",
+    ):
+        self.language_standard: Literal["c90", "c99"] = language_standard
+        """Language standard for the generated code.
+        'c99' uses designated initializers (e.g. '.field = value'), 'c90' uses positional initializers only."""
+
+        self.accessor_style: Literal["macros", "inline_functions"] = accessor_style
+        """Style for the generated parameter accessors (getters/setters).
+        'inline_functions' generates 'static inline' getters/setters, 'macros' generates preprocessor macros."""
+
+        self.cache_layout: Literal["granular", "monolith"] = cache_layout
+        """Layout of the parameter cache objects.
+        'granular' generates one cache struct per block, 'monolith' aggregates all blocks into one large struct."""
+
+
 class PlatformSettings:
     """Collection of platform-specific settings."""
 
@@ -67,8 +89,8 @@ class PlatformSettings:
         enter_critical_section_operation: Optional[str] = None,
         exit_critical_section_operation: Optional[str] = None,
         compiler_directives: CompilerDirectives = CompilerDirectives(),
+        code_gen_settings: CodeGenSettings = CodeGenSettings(),
     ):
-
         self.endianness: Literal["little", "big"] = endianness
         """Endianness of the target CPU"""
 
@@ -96,6 +118,9 @@ class PlatformSettings:
         self.compiler_directives: CompilerDirectives = compiler_directives
         """Global directives for packing and block-scoped directives for placement."""
 
+        self.code_gen_settings: CodeGenSettings = code_gen_settings
+        """Settings that control the style of the generated code."""
+
     @staticmethod
     def load_from_file(path: str) -> "PlatformSettings":
         with open(path, "r", encoding="utf-8") as f:
@@ -113,6 +138,10 @@ class PlatformSettings:
                     compiler_data["block_placement_directives"] = placement_dict
 
                 data["compiler_directives"] = CompilerDirectives(**compiler_data)
+
+            # Handle nested CodeGenSettings
+            if "code_gen_settings" in data and data["code_gen_settings"] is not None:
+                data["code_gen_settings"] = CodeGenSettings(**data["code_gen_settings"])
 
             return PlatformSettings(**data)
 
@@ -168,6 +197,15 @@ class PlatformSettings:
                 )
             if placement.directive_for_cache and placement.attribute_for_cache:
                 errors.append(f"Block '{block_name}': You can't have both placement directive and attribute for cache defined at the same time! Pick only one.")
+
+        if self.code_gen_settings.language_standard not in ("c90", "c99"):
+            errors.append(f"'code_gen_settings.language_standard' must be 'c90' or 'c99'!")
+
+        if self.code_gen_settings.accessor_style not in ("macros", "inline_functions"):
+            errors.append(f"'code_gen_settings.accessor_style' must be 'macros' or 'inline_functions'!")
+
+        if self.code_gen_settings.cache_layout not in ("granular", "monolith"):
+            errors.append(f"'code_gen_settings.cache_layout' must be 'granular' or 'monolith'!")
 
         if errors:
             raise Exception("\n".join(f"- {error}" for error in errors))

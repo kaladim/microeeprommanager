@@ -52,7 +52,10 @@ const FieldDocs = {
         directive_for_defaults: "Compiler-specific placement directive for the 'defaults' object. Will be placed just before the 'defaults' object definition. You either use a placement directive or an attribute, but not both at the same time.",
         attribute_for_defaults: "Compiler-specific placement attribute for the 'defaults' object. Will be added to the 'defaults' object definition. You either use a placement directive or an attribute, but not both at the same time.",
         directive_for_cache: "Compiler-specific placement directive for the cache object. Will be placed just before the 'cache' object definition. You either use a placement directive or an attribute, but not both at the same time.",
-        attribute_for_cache: "Compiler-specific placement attribute for the 'cache' object. Will be added to the 'cache' object definition. You either use a placement directive or an attribute, but not both at the same time."
+        attribute_for_cache: "Compiler-specific placement attribute for the 'cache' object. Will be added to the 'cache' object definition. You either use a placement directive or an attribute, but not both at the same time.",
+        language_standard: "Style for 'const' object initializations. 'c99' uses designated initializers (e.g. '.field = value'), 'c90' uses positional initializers only.",
+        accessor_style: "Style for the generated parameter accessors (getters/setters). 'inline_functions' generates 'static inline' getters/setters, 'macros' generates preprocessor macros.",
+        cache_layout: "Layout of the parameter cache objects. 'granular' generates one cache struct per block, 'monolith' aggregates all blocks into one large struct."
     }
 };
 
@@ -368,7 +371,7 @@ function makeEmptyDataModel() { return { name: '', description: '', checksum_siz
 function makeEmptyBlock() { return { name: '', description: '', children: [], management_type: ManagementTypes.Basic, instance_count: 1, data_recovery_strategy: 0, compress_defaults: true } }
 function makeEmptyParameter() { return { name: '', description: '', children: [], data_type: DataTypes.uint8, multiplicity: 1, default_value: [0] } }
 function makeEmptyBitfield() { return { name: '', description: '', size_in_bits: 1 } }
-function makeDefaultPlatform() { return { endianness: 'little', eeprom_size: 256, eeprom_page_size: 0, page_aligned_blocks: ['*'], external_headers: [], enter_critical_section_operation: null, exit_critical_section_operation: null, compiler_directives: { opening_pack_directive: null, closing_pack_directive: null, pack_attribute: null, block_placement_directives: {} } } }
+function makeDefaultPlatform() { return { endianness: 'little', eeprom_size: 256, eeprom_page_size: 0, page_aligned_blocks: ['*'], external_headers: [], enter_critical_section_operation: null, exit_critical_section_operation: null, compiler_directives: { opening_pack_directive: null, closing_pack_directive: null, pack_attribute: null, block_placement_directives: {} }, code_gen_settings: { language_standard: 'c90', accessor_style: 'inline_functions', cache_layout: 'granular' } } }
 function makeDefaultChecksum() { return { algo: 'crc' } }
 
 // File menu
@@ -2231,90 +2234,132 @@ function renderPlatformSettings() {
     }
 
     hint.style.display = 'none';
-    grid.style.display = 'grid';
+    grid.style.display = 'block';
 
     const ps = state.platformSettings;
 
-    // Ensure compiler_directives exists
+    // Ensure nested objects exist (mirrors the PlatformSettings class structure)
     if (!ps.compiler_directives) {
-        ps.compiler_directives = {
-            opening_pack_directive: null,
-            closing_pack_directive: null,
-            pack_attribute: null,
-            block_placement_directives: {}
-        };
+        ps.compiler_directives = { opening_pack_directive: null, closing_pack_directive: null, pack_attribute: null, block_placement_directives: {} };
+    }
+    if (!ps.code_gen_settings) {
+        ps.code_gen_settings = { language_standard: 'c90', accessor_style: 'inline_functions', cache_layout: 'granular' };
     }
 
-    for (const key of ['endianness', 'eeprom_size', 'eeprom_page_size', 'external_headers', 'enter_critical_section_operation', 'exit_critical_section_operation', 'opening_pack_directive', 'closing_pack_directive', 'pack_attribute']) {
-        const label = document.createElement('div');
-
-        // Handle compiler directive fields specially
-        const isCompilerDirective = ['opening_pack_directive', 'closing_pack_directive', 'pack_attribute'].includes(key);
-        label.textContent = formatLabel(key);
-
-        // Add tooltip from FieldDocs
-        if (FieldDocs.platform && FieldDocs.platform[key]) {
-            label.title = FieldDocs.platform[key];
-        }
-        const valWrap = document.createElement('div');
-        if (key === 'endianness') {
-            const endOptions = { 'little': 'little', 'big': 'big' };
-            const wrap = createCustomSelect(endOptions, ps.endianness || 'little', (newVal) => {
-                ps.endianness = newVal;
-                setStatus('Platform endianness changed');
-            });
-            valWrap.appendChild(wrap);
-        }
-        else if (Array.isArray(ps[key])) { const t = document.createElement('textarea'); t.style.width = '100%'; t.style.height = '80px'; t.value = ps[key].join('\n'); t.addEventListener('change', () => { ps[key] = t.value.split(/\r?\n/).filter(r => r.trim()); setStatus(key + ' changed') }); valWrap.appendChild(t) }
-        else {
-            if (key === 'eeprom_size') {
-                const inp = document.createElement('input'); inp.type = 'number'; inp.min = 64; inp.max = 65536; inp.value = Number(ps[key] || 256);
-                inp.addEventListener('change', () => {
-                    let nv = Number(inp.value);
-                    if (!Number.isFinite(nv)) nv = 64;
-                    nv = Math.trunc(nv);
-                    if (nv < 64) nv = 64;
-                    if (nv > 65536) nv = 65536;
-                    inp.value = nv;
-                    ps[key] = nv; setStatus(key + ' changed');
-                });
-                valWrap.appendChild(inp);
-            }
-            else if (key === 'eeprom_page_size') {
-                // Build options: 0, 2,4,8,...,32768
-                const pageOptions = { '0': '0' };
-                for (let p = 2; p <= 32768; p *= 2) pageOptions[String(p)] = String(p);
-                const currentVal = Number(ps[key] || 0);
-                const wrap = createCustomSelect(pageOptions, String(currentVal), (newVal) => {
-                    ps[key] = Number(newVal);
-                    setStatus(key + ' changed');
-                });
-                valWrap.appendChild(wrap);
-            }
-            else {
-                const inp = document.createElement('input');
-                inp.type = 'text';
-
-                // Get value from compiler_directives for compiler directive fields
-                if (isCompilerDirective) {
-                    inp.value = ps.compiler_directives[key] || '';
-                    inp.addEventListener('change', () => {
-                        ps.compiler_directives[key] = inp.value || null;
-                        setStatus(key + ' changed');
-                    });
-                } else {
-                    inp.value = ps[key] || '';
-                    inp.addEventListener('change', () => {
-                        ps[key] = inp.value;
-                        setStatus(key + ' changed');
-                    });
-                }
-
-                valWrap.appendChild(inp);
-            }
-        }
-        const d1 = document.createElement('div'); d1.appendChild(label); grid.appendChild(d1); const d2 = document.createElement('div'); d2.appendChild(valWrap); grid.appendChild(d2);
+    // ---- General (PlatformSettings) ----
+    const general = createSettingsSection('General');
+    for (const key of ['endianness', 'eeprom_size', 'eeprom_page_size', 'page_aligned_blocks', 'external_headers', 'enter_critical_section_operation', 'exit_critical_section_operation']) {
+        addPlatformField(general.grid, ps, key);
     }
+    grid.appendChild(general.section);
+
+    // ---- Compiler directives (CompilerDirectives) ----
+    const compiler = createSettingsSection('Compiler directives');
+    for (const key of ['opening_pack_directive', 'closing_pack_directive', 'pack_attribute']) {
+        addPlatformField(compiler.grid, ps.compiler_directives, key);
+    }
+    const note = document.createElement('div');
+    note.className = 'hint';
+    note.style.margin = '8px 0 0';
+    note.textContent = 'Block-scoped placement directives are edited per block, in the Data model tab.';
+    compiler.body.appendChild(note);
+    grid.appendChild(compiler.section);
+
+    // ---- Code generation (CodeGenSettings) ----
+    const codeGen = createSettingsSection('Code generation');
+    for (const key of ['language_standard', 'accessor_style', 'cache_layout']) {
+        addPlatformField(codeGen.grid, ps.code_gen_settings, key);
+    }
+    grid.appendChild(codeGen.section);
+}
+
+// Builds a foldable section (details/summary) holding a settings-grid.
+function createSettingsSection(title) {
+    const section = document.createElement('details');
+    section.className = 'settings-section';
+    section.open = true;
+    const summary = document.createElement('summary');
+    summary.textContent = title;
+    section.appendChild(summary);
+    const body = document.createElement('div');
+    body.className = 'settings-section-body';
+    const grid = document.createElement('div');
+    grid.className = 'settings-grid';
+    body.appendChild(grid);
+    section.appendChild(body);
+    return { section, body, grid };
+}
+
+// Renders a single label/value row for the given object key into a settings-grid.
+function addPlatformField(grid, obj, key) {
+    const label = document.createElement('div');
+    label.textContent = formatLabel(key);
+    if (FieldDocs.platform && FieldDocs.platform[key]) {
+        label.title = FieldDocs.platform[key];
+    }
+
+    const valWrap = document.createElement('div');
+
+    const selectFields = {
+        endianness: { little: 'little', big: 'big' },
+        language_standard: { c90: 'c90', c99: 'c99' },
+        accessor_style: { inline_functions: 'inline functions', macros: 'macros' },
+        cache_layout: { granular: 'granular', monolith: 'monolith' },
+    };
+
+    if (selectFields[key]) {
+        const options = selectFields[key];
+        const fallback = Object.keys(options)[0];
+        const wrap = createCustomSelect(options, obj[key] || fallback, (newVal) => {
+            obj[key] = newVal;
+            setStatus(formatLabel(key) + ' changed');
+        });
+        valWrap.appendChild(wrap);
+    }
+    else if (key === 'page_aligned_blocks' || key === 'external_headers' || Array.isArray(obj[key])) {
+        const t = document.createElement('textarea');
+        t.style.width = '100%';
+        t.style.height = '80px';
+        t.value = (obj[key] || []).join('\n');
+        t.addEventListener('change', () => {
+            obj[key] = t.value.split(/\r?\n/).map(r => r.trim()).filter(r => r);
+            setStatus(formatLabel(key) + ' changed');
+        });
+        valWrap.appendChild(t);
+    }
+    else if (key === 'eeprom_size') {
+        const inp = document.createElement('input'); inp.type = 'number'; inp.min = 64; inp.max = 65536; inp.value = Number(obj[key] || 256);
+        inp.addEventListener('change', () => {
+            let nv = Math.trunc(Number(inp.value));
+            if (!Number.isFinite(nv)) nv = 64;
+            nv = Math.min(65536, Math.max(64, nv));
+            inp.value = nv;
+            obj[key] = nv; setStatus('eeprom_size changed');
+        });
+        valWrap.appendChild(inp);
+    }
+    else if (key === 'eeprom_page_size') {
+        const pageOptions = { '0': '0' };
+        for (let p = 2; p <= 32768; p *= 2) pageOptions[String(p)] = String(p);
+        const wrap = createCustomSelect(pageOptions, String(Number(obj[key] || 0)), (newVal) => {
+            obj[key] = Number(newVal);
+            setStatus('eeprom_page_size changed');
+        });
+        valWrap.appendChild(wrap);
+    }
+    else {
+        const inp = document.createElement('input');
+        inp.type = 'text';
+        inp.value = obj[key] || '';
+        inp.addEventListener('change', () => {
+            obj[key] = inp.value || null;
+            setStatus(formatLabel(key) + ' changed');
+        });
+        valWrap.appendChild(inp);
+    }
+
+    const d1 = document.createElement('div'); d1.appendChild(label); grid.appendChild(d1);
+    const d2 = document.createElement('div'); d2.appendChild(valWrap); grid.appendChild(d2);
 }
 
 // checksum rendering

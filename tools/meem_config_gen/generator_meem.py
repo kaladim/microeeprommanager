@@ -188,16 +188,20 @@ class CodeGen_MEEM(CodeGenerator):
         txt += self.to_comment_box("   Parameter caches", self.TextAlignment.Left) + "\n"
         txt += self.generate_parameter_caches(True) + "\n"
 
+        if self._settings.code_gen_settings.cache_layout == "monolith":
+            txt += self.to_comment_line("----- Block cache accessors -----", self.TextAlignment.Left) + "\n"
+            txt += self.generate_cache_access_macros() + "\n"
+
         txt += self.to_comment_box("   Parameter access wrappers", self.TextAlignment.Left) + "\n"
         txt += self.to_comment_line("----- Getters -----", self.TextAlignment.Left) + "\n"
         for block in self._datamodel.children:
             for param in block.children:
-                txt += self.generate_parameter_getter_function(block, param) + "\n"
+                txt += self.generate_parameter_getter_function(block, param)
         txt += "\n"
         txt += self.to_comment_line("----- Setters -----", self.TextAlignment.Left) + "\n"
         for block in self._datamodel.children:
             for param in block.children:
-                txt += self.generate_parameter_setter_function(block, param) + "\n"
+                txt += self.generate_parameter_setter_function(block, param)
 
         return txt
 
@@ -243,39 +247,50 @@ class CodeGen_MEEM(CodeGenerator):
         return txt
 
     def generate_parameter_getter_function(self, block: Block, param: Parameter) -> str:
-        source_memory = f"MEEM_cache_{block.name}"
-        array_suffix = "[index]" if param.multiplicity > 1 else ""
-        array_index_type = f'{"uint16_t" if param.multiplicity > 255 else "uint8_t"}'
-        array_arg = f'{(array_index_type + "  index") if param.multiplicity > 1 else ""}'
+        cache = self.generate_block_cache_access(block)
+        is_array = param.multiplicity > 1
+        array_suffix = "[index]" if is_array else ""
+        array_index_type = "uint16_t" if param.multiplicity > 255 else "uint8_t"
+        use_macros = self._settings.code_gen_settings.accessor_style == "macros"
         txt = ""
 
         if len(param.children) == 0:
-            txt += f"static inline {str(param.data_type)} MEEM_Get_{block.name}_{param.name}({array_arg}) {{\n"
-            txt += f"    return {source_memory}.{param.name}{array_suffix};\n"
-            txt += f"}}\n"
-            return txt
+            targets = [(f"MEEM_Get_{block.name}_{param.name}", f"{cache}.{param.name}{array_suffix}")]
         else:
-            for bf in param.children:
-                txt += f"static inline {str(param.data_type)} MEEM_Get_{block.name}_{param.name}_{bf.name}({array_arg}) {{\n"
-                txt += f"    return {source_memory}.{param.name}{array_suffix}.{bf.name};\n"
+            targets = [(f"MEEM_Get_{block.name}_{param.name}_{bf.name}", f"{cache}.{param.name}{array_suffix}.{bf.name}") for bf in param.children]
+
+        for func_name, access in targets:
+            if use_macros:
+                macro_args = "index" if is_array else ""
+                txt += f"#define {func_name}({macro_args})    {access}\n"
+            else:
+                func_args = f"{array_index_type}  index" if is_array else ""
+                txt += f"static inline {str(param.data_type)} {func_name}({func_args}) {{\n"
+                txt += f"    return {access};\n"
                 txt += f"}}\n"
         return txt
 
     def generate_parameter_setter_function(self, block: Block, param: Parameter) -> str:
-        array_suffix = "[index]" if param.multiplicity > 1 else ""
-        array_arg = f"{',index' if param.multiplicity > 1 else ''}"
-        array_index_type = f'{"uint16_t" if param.multiplicity > 255 else "uint8_t"}'
-        array_arg = f'{(", " + array_index_type + "  index") if param.multiplicity > 1 else ""}'
+        cache = self.generate_block_cache_access(block)
+        is_array = param.multiplicity > 1
+        array_suffix = "[index]" if is_array else ""
+        array_index_type = "uint16_t" if param.multiplicity > 255 else "uint8_t"
+        use_macros = self._settings.code_gen_settings.accessor_style == "macros"
         txt = ""
 
         if len(param.children) == 0:
-            txt += f"static inline void MEEM_Set_{block.name}_{param.name}({str(param.data_type)} value{array_arg}) {{\n"
-            txt += f"    MEEM_cache_{block.name}.{param.name}{array_suffix} = value;\n"
-            txt += f"}}\n"
+            targets = [(f"MEEM_Set_{block.name}_{param.name}", f"{cache}.{param.name}{array_suffix}")]
         else:
-            for bf in param.children:
-                txt += f"static inline void MEEM_Set_{block.name}_{param.name}_{bf.name}({str(param.data_type)} value{array_arg}) {{\n"
-                txt += f"    MEEM_cache_{block.name}.{param.name}{array_suffix}.{bf.name} = value;\n"
+            targets = [(f"MEEM_Set_{block.name}_{param.name}_{bf.name}", f"{cache}.{param.name}{array_suffix}.{bf.name}") for bf in param.children]
+
+        for func_name, access in targets:
+            if use_macros:
+                macro_args = "value, index" if is_array else "value"
+                txt += f"#define {func_name}({macro_args})    {access} = (value)\n"
+            else:
+                func_args = f"{str(param.data_type)} value" + (f", {array_index_type}  index" if is_array else "")
+                txt += f"static inline void {func_name}({func_args}) {{\n"
+                txt += f"    {access} = value;\n"
                 txt += f"}}\n"
         return txt
 
@@ -285,6 +300,9 @@ class CodeGen_MEEM(CodeGenerator):
         return txt
 
     def generate_parameter_caches(self, for_prototype: bool) -> str:
+        if self._settings.code_gen_settings.cache_layout == "monolith":
+            return self.generate_aggregate_parameter_cache(for_prototype)
+
         txt = ""
         ext = "EXTERN_C " if for_prototype else ""
 
@@ -295,6 +313,23 @@ class CodeGen_MEEM(CodeGenerator):
                     txt += directive + "\n"
 
             txt += f"{ext}{self.generate_parameter_cache(block, for_prototype)};\n"
+        return txt
+
+    def generate_aggregate_parameter_cache(self, for_prototype: bool) -> str:
+        if not for_prototype:
+            return "MEEM_cache_t  MEEM_cache;\n"
+
+        attr = (self._settings.compiler_directives.pack_attribute + " ") if self._settings.compiler_directives.pack_attribute else ""
+        txt = ""
+        if self._settings.compiler_directives.opening_pack_directive:
+            txt += self._settings.compiler_directives.opening_pack_directive + "\n"
+        txt += f"typedef struct {attr}{{\n"
+        for block in self._datamodel.children:
+            txt += f"    MEEM_params_{block.name}_t  {block.name};\n"
+        txt += "} MEEM_cache_t;\n"
+        if self._settings.compiler_directives.closing_pack_directive:
+            txt += self._settings.compiler_directives.closing_pack_directive + "\n"
+        txt += "EXTERN_C MEEM_cache_t  MEEM_cache;\n"
         return txt
 
     def generate_parameter_cache(self, block: Block, for_prototype: bool) -> str:
@@ -341,7 +376,7 @@ class CodeGen_MEEM(CodeGenerator):
         txt += f"const MEEM_params_{block.name}_t{placement_attribute}  MEEM_defaults_{block.name} = {{\n"
 
         if block.management_type == Block.ManagementTypes.WearLeveling:
-            txt += "    /* .do_not_use_me = */ 0,\n"
+            txt += f"    {self.init_field('do_not_use_me')}0,\n"
 
         for param in block.children:
             txt += self.generate_definition_of_defaults_for_parameter(param)
@@ -370,14 +405,14 @@ class CodeGen_MEEM(CodeGenerator):
         return txt
 
     def generate_definition_of_defaults_for_parameter(self, param: Parameter) -> str:
-        txt = f"    /* .{param.name} = */ "
+        txt = f"    {self.init_field(param.name)}"
 
         if param.multiplicity > 1:
             txt += "{" + "\n"
 
             if len(param.children) > 0:
                 for i in range(0, param.multiplicity):
-                    txt += f"        {{ /* .all = */ {self.to_str(param.default_value[i])} }},\n"
+                    txt += f"        {{ {self.init_field('all')}{self.to_str(param.default_value[i])} }},\n"
                 txt = self.remove_last_occurrence_of(",", txt)
             else:
                 txt += "        " + ", ".join([self.to_str(d) for d in param.default_value]) + "\n"
@@ -385,7 +420,7 @@ class CodeGen_MEEM(CodeGenerator):
             txt += "    },\n"
         else:
             if len(param.children) > 0:
-                txt += f"{{ /* .all = */ {self.to_str(param.default_value[0])} }},\n"
+                txt += f"{{ {self.init_field('all')}{self.to_str(param.default_value[0])} }},\n"
             else:
                 txt += self.to_str(param.default_value[0]) + ",\n"
 
@@ -413,14 +448,14 @@ class CodeGen_MEEM(CodeGenerator):
 
             txt = f"    /* Block '{block.name}' */\n"
             txt += f"    {{\n"
-            txt += f"        /* .cache = */ (uint8_t*)&MEEM_cache_{block.name},\n"
-            txt += f"        /* .defaults = */ {cast}MEEM_defaults_{block.name},\n"
-            txt += f"        /* .offset_in_eeprom = */ {self.to_str(block.offset_in_eeprom)},\n"  # type:ignore
-            txt += f"        /* .data_size = */ {block.data_size},\n"
-            txt += f"        /* .default_pattern_length = */ {0 if block.default_pattern is None else len(block.default_pattern)},\n"
-            txt += f"        /* .instance_count = */ {block.instance_count},\n"
-            txt += f"        /* .management_type = */ {str(block.management_type)},\n"
-            txt += f"        /* .data_recovery_strategy = */ {str(block.data_recovery_strategy)}\n"
+            txt += f"        {self.init_field('cache')}(uint8_t*)&{self.generate_block_cache_access(block)},\n"
+            txt += f"        {self.init_field('defaults')}{cast}MEEM_defaults_{block.name},\n"
+            txt += f"        {self.init_field('offset_in_eeprom')}{self.to_str(block.offset_in_eeprom)},\n"  # type:ignore
+            txt += f"        {self.init_field('data_size')}{block.data_size},\n"
+            txt += f"        {self.init_field('default_pattern_length')}{0 if block.default_pattern is None else len(block.default_pattern)},\n"
+            txt += f"        {self.init_field('instance_count')}{block.instance_count},\n"
+            txt += f"        {self.init_field('management_type')}{str(block.management_type)},\n"
+            txt += f"        {self.init_field('data_recovery_strategy')}{str(block.data_recovery_strategy)}\n"
             txt += f"    }}"
             configs.append(txt)
 
@@ -428,6 +463,26 @@ class CodeGen_MEEM(CodeGenerator):
 
     def generate_block_cache_object_name(self, block: Block) -> str:
         return f"MEEM_cache_{block.name}"
+
+    def generate_block_cache_access(self, block: Block) -> str:
+        """Returns the lvalue expression used to access a block's cache object."""
+        if self._settings.code_gen_settings.cache_layout == "monolith":
+            return f"MEEM_cache.{block.name}"
+        return f"MEEM_cache_{block.name}"
+
+    def generate_cache_access_macros(self) -> str:
+        """Generates uniform macros to refer to a block's cache object, regardless of the configured cache objects type."""
+        txt = ""
+        for block in self._datamodel.children:
+            txt += f"#define MEEM_cache_{block.name}    ({self.generate_block_cache_access(block)})\n"
+        return txt
+
+    def init_field(self, name: str) -> str:
+        """Returns the struct field initializer prefix according to the configured language standard.
+        'c99' emits a designated initializer, 'c90' emits a positional initializer with a documentation comment."""
+        if self._settings.code_gen_settings.language_standard == "c99":
+            return f".{name} = "
+        return f"/* .{name} = */ "
 
     def sanitize_description(self, comment: str) -> str:
         return comment.replace("//", "").replace("/*", "").replace("*/", "").replace("\n", " ").replace("\r", " ").strip()
