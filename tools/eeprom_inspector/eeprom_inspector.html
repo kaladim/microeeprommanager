@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en" class="wa-dark">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>mEEM EEPROM Inspector</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔎</text></svg>">
+
+    <!-- Font Awesome (free) - icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+
+    <!-- WebAwesome (free) - components + theme -->
+    <link rel="stylesheet" href="https://early.webawesome.com/webawesome@3.0.0-beta.6/dist/styles/webawesome.css">
+    <script type="module" src="https://early.webawesome.com/webawesome@3.0.0-beta.6/dist/webawesome.loader.js"></script>
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <header class="app-header">
+        <h1><i class="fa-solid fa-magnifying-glass"></i> mEEM&nbsp;EEPROM&nbsp;Inspector</h1>
+        <span class="subtitle">Analyze an EEPROM binary image against a mEEM configuration</span>
+    </header>
+
+    <wa-tab-group id="tabs">
+        <wa-tab panel="files"><i class="fa-solid fa-folder-open"></i>&nbsp;Input files</wa-tab>
+        <wa-tab panel="report" id="reportTab" disabled><i class="fa-solid fa-table-list"></i>&nbsp;Report</wa-tab>
+
+        <!-- ============================ INPUT FILES ============================ -->
+        <wa-tab-panel name="files">
+            <div class="files-intro">
+                Select the EEPROM image plus the three mEEM configuration files that were used when the image was
+                produced. Drag&nbsp;&amp;&nbsp;drop is supported. The report is generated automatically once all
+                four files are loaded.
+            </div>
+
+            <div class="file-grid" id="fileGrid">
+                <!-- cards injected by app.js -->
+            </div>
+
+            <div class="files-actions">
+                <wa-button id="viewReportBtn" variant="brand" disabled>
+                    <i class="fa-solid fa-table-list" slot="start"></i> View report
+                </wa-button>
+                <wa-button id="clearBtn" appearance="outlined">
+                    <i class="fa-solid fa-eraser" slot="start"></i> Clear all
+                </wa-button>
+            </div>
+
+            <div id="filesMessage"></div>
+        </wa-tab-panel>
+
+        <!-- ============================== REPORT =============================== -->
+        <wa-tab-panel name="report">
+            <div id="reportHeader"></div>
+
+            <div class="report-toolbar" id="reportToolbar" style="display:none">
+                <wa-button size="small" appearance="outlined" id="expandAllBtn">
+                    <i class="fa-solid fa-angles-down" slot="start"></i> Expand all
+                </wa-button>
+                <wa-button size="small" appearance="outlined" id="collapseAllBtn">
+                    <i class="fa-solid fa-angles-up" slot="start"></i> Collapse all
+                </wa-button>
+                <wa-button size="small" appearance="outlined" id="globalFormatBtn"
+                    title="Toggle every value between hexadecimal and decimal">
+                    <i class="fa-solid fa-arrow-right-arrow-left" slot="start"></i>
+                    <span data-format-label>Show all in DEC</span>
+                </wa-button>
+            </div>
+
+            <div id="reportRoot">
+                <div class="report-empty">
+                    <i class="fa-regular fa-file-lines"></i>
+                    <p>No report yet. Load the input files to generate one.</p>
+                </div>
+            </div>
+        </wa-tab-panel>
+    </wa-tab-group>
+
+    <!-- Core business logic (classic scripts sharing the global EEPROM namespace).
+         Load order matters: dependencies first. -->
+    <script src="core/data_model.js"></script>
+    <script src="core/wear_leveling.js"></script>
+    <script src="core/crc.js"></script>
+    <script src="core/image_loader.js"></script>
+    <script src="core/intel_hex.js"></script>
+    <script src="core/srecord.js"></script>
+    <script src="core/report_builder.js"></script>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
