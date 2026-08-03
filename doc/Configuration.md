@@ -8,4 +8,8 @@ The best approach would be to integrate the generation in the build process and 
 Use the provided [GUI configurator](../tools/configurator/README.md). All settings are explained in details there.
 
 ### 3. Generate the sources
-Feed the newly created data model & platform settings to [the code generator](../tools/meem_config_gen/README.md).
+Feed the newly created data model & platform settings to [the code generator](../tools/meem_config_gen/README.md):
+```bash
+uv run ./tools/meem_config_gen/meem_config_gen.py  <DATAMODEL>  <SETTINGS>  <OUTPUT_DIR>
+```
+[`uv`](../README.md#prerequisites) takes care of the Python interpreter and the dependencies, so the command is also safe to call directly from a build script (see [the CMake integration](../test/meem_config/CMakeLists.txt) and [the MPLAB X pre-build actions](../example/Microchip/mEEM-demo.X/pre_build_actions.ps1) for reference).

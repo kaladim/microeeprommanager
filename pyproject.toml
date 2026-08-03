@@ -1,3 +1,26 @@
+[project]
+name = "meem-tools"
+version = "1.0.0"
+description = "Configuration and utility tools for the mEEM EEPROM manager"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+dependencies = [
+    "bincopy",
+    "colorama",
+    "crcmod",
+    "tzlocal",
+]
+
+[dependency-groups]
+dev = [
+    "black",
+]
+
+# The tools are plain scripts, executed via `uv run`, not an installable package.
+[tool.uv]
+package = false
+
 [tool.black]
 line-length = 160
 target-version = ['py310', 'py311', 'py312']

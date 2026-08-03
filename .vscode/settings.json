@@ -1,7 +1,6 @@
 {
-    "python.defaultInterpreterPath": "./.venv_meem/Scripts/python.exe",
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv",
     "python.terminal.activateEnvironment": true,
-    "python.envFile": "${workspaceFolder}/.venv_meem/.env",
     "cmake.sourceDirectory": "${workspaceFolder}",
     "cmake.buildDirectory": "${workspaceFolder}/build",
     "cmake.configureOnOpen": false,

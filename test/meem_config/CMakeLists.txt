@@ -1,9 +1,6 @@
-# Use Python from the virtual environment
-if(WIN32)
-    set(Python3_EXECUTABLE "${CMAKE_SOURCE_DIR}/.venv_meem/Scripts/python.exe")
-else()
-    set(Python3_EXECUTABLE "${CMAKE_SOURCE_DIR}/.venv_meem/bin/python")
-endif()
+# Python tools are run through uv, which provisions the interpreter and the
+# dependencies from the pyproject.toml/uv.lock in the project root.
+find_program(UV_EXECUTABLE uv REQUIRED)
 
 # Define the generated source files (in build directory)
 set(GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
@@ -29,6 +26,7 @@ set(GENERATOR_INPUTS
     ${CMAKE_CURRENT_SOURCE_DIR}/eeprom_datamodel.json
     ${PLATFORM_SETTINGS_FILE}
     ${CMAKE_SOURCE_DIR}/tools/meem_config_gen/meem_config_gen.py
+    ${CMAKE_SOURCE_DIR}/uv.lock
 )
 
 # Create the generated directory
@@ -37,7 +35,7 @@ file(MAKE_DIRECTORY ${GENERATED_DIR})
 # Custom command to generate mEEM configuration files
 add_custom_command(
     OUTPUT ${GENERATED_FILES}
-    COMMAND ${Python3_EXECUTABLE} 
+    COMMAND ${UV_EXECUTABLE} run --project ${CMAKE_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/tools/meem_config_gen/meem_config_gen.py
         ${CMAKE_CURRENT_SOURCE_DIR}/eeprom_datamodel.json
         ${PLATFORM_SETTINGS_FILE}

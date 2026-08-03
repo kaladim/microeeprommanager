@@ -47,20 +47,27 @@ $ git submodule update --init
 │   ├── Configuration.md          # Configuration guide
 │   └── Operation.md              # Detailed operation description
 ├── CMakeLists.txt                # CMake build configuration
-├── pyproject.toml                # Python project configuration
-├── requirements.txt              # Python dependencies
-└── setup_venv.{sh,ps1}           # Virtual environment setup scripts
+├── pyproject.toml                # Python project & dependency declaration
+├── uv.lock                       # Pinned Python dependencies (managed by uv)
+└── .python-version               # Python version used by the tools
 ```
 
 ## Prerequisites
-[Python 3.10](https://www.python.org/downloads/) (or newer) + an [active virtual environment](./setup_venv.sh):  
+The Python tools are managed by [uv](https://docs.astral.sh/uv/). Install it once:  
 **Linux/macOS:**
 ```bash
-$ source ./setup_venv.sh
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 **Windows:**
 ```powershell
-> .\setup_venv.ps1
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+That is all — no manual virtual environment, no `pip install`. On the first `uv run`, `uv` reads [pyproject.toml](./pyproject.toml) and [.python-version](./.python-version), then fetches the pinned Python (3.12; the tools require 3.10 or newer) together with the dependencies locked in [uv.lock](./uv.lock).
+
+Optionally, create the environment (`.venv/`) upfront:
+```bash
+uv sync
 ```
 
 ## Integration

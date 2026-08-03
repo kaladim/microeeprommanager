@@ -4,12 +4,13 @@ Creates a ready-to-flash binary image from a data model, platform settings and c
 The output is a [Intel HEX](https://en.wikipedia.org/wiki/Intel_HEX) file.
 
 ## Usage
-[Make sure](../../README.md#tools) the Python virtual environment is active.
+[Make sure](../../README.md#prerequisites) `uv` is installed. It provisions Python and the dependencies on demand, so no virtual environment has to be created or activated by hand.
 
 ### Example
 
+From the project root execute:
 ```bash
-python3 ./eeprom_image_gen/eeprom_image_gen.py \
+uv run ./tools/eeprom_image_gen/eeprom_image_gen.py \
     ./config/datamodel.json \
     ./config/platform_settings.json \
     ./config/checksum_parameters.json \

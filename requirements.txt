@@ -1,4 +1,0 @@
-tzlocal
-colorama
-crcmod
-bincopy
