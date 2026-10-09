@@ -55,3 +55,5 @@ in dependency order (as listed) — no bundler or ES modules, so it works from `
 | `core/intel_hex.js`        | Intel HEX parser                                                    |
 | `core/srecord.js`          | Motorola S-record (S19/S28/S37) parser                             |
 | `core/report_builder.js`   | Report/view-model builder and top-level orchestration              |
+
+The business logic is covered by tests in `test/`, run with the built-in test runner of [Node.js](https://nodejs.org) (`node --test`, from this directory). They are part of the CMake test suite, if Node.js is installed.

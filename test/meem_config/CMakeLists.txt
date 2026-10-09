@@ -2,15 +2,6 @@
 # dependencies from the pyproject.toml/uv.lock in the project root.
 find_program(UV_EXECUTABLE uv REQUIRED)
 
-# Define the generated source files (in build directory)
-set(GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
-set(GENERATED_FILES
-    ${GENERATED_DIR}/MEEM_GenConfig.h
-    ${GENERATED_DIR}/MEEM_GenConfig.c
-    ${GENERATED_DIR}/MEEM_GenInterface.h
-    ${GENERATED_DIR}/MEEM_GenInterface.c
-)
-
 # Select platform settings file based on compiler/OS
 if(WIN32)
     set(PLATFORM_SETTINGS_FILE "${CMAKE_CURRENT_SOURCE_DIR}/platform_settings_msvc.json")
@@ -21,94 +12,113 @@ endif()
 
 message(STATUS "Using platform settings: ${PLATFORM_SETTINGS_FILE}")
 
-# Define the input files that the generator depends on
-set(GENERATOR_INPUTS
-    ${CMAKE_CURRENT_SOURCE_DIR}/eeprom_datamodel.json
-    ${PLATFORM_SETTINGS_FILE}
-    ${CMAKE_SOURCE_DIR}/tools/meem_config_gen/meem_config_gen.py
-    ${CMAKE_SOURCE_DIR}/uv.lock
-)
+#------------------------------------------------------------------------------
+# Defines the targets of a test configuration, generated from DATAMODEL:
+#   mEEM-GenConfig<SUFFIX>       - Generated configuration files
+#   mEEM-UserConfig<SUFFIX>      - User-written configuration files
+#   mEEM-Config<SUFFIX>          - Combined interface
+#   generate-meem-config<SUFFIX> - Explicit generation
+#------------------------------------------------------------------------------
+function(meem_add_test_config SUFFIX DATAMODEL)
+    # Define the generated source files (in build directory)
+    set(GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated${SUFFIX}")
+    set(GENERATED_FILES
+        ${GENERATED_DIR}/MEEM_GenConfig.h
+        ${GENERATED_DIR}/MEEM_GenConfig.c
+        ${GENERATED_DIR}/MEEM_GenInterface.h
+        ${GENERATED_DIR}/MEEM_GenInterface.c
+    )
 
-# Create the generated directory
-file(MAKE_DIRECTORY ${GENERATED_DIR})
-
-# Custom command to generate mEEM configuration files
-add_custom_command(
-    OUTPUT ${GENERATED_FILES}
-    COMMAND ${UV_EXECUTABLE} run --project ${CMAKE_SOURCE_DIR}
-        ${CMAKE_SOURCE_DIR}/tools/meem_config_gen/meem_config_gen.py
-        ${CMAKE_CURRENT_SOURCE_DIR}/eeprom_datamodel.json
+    # Define the input files that the generator depends on
+    set(GENERATOR_INPUTS
+        ${CMAKE_CURRENT_SOURCE_DIR}/${DATAMODEL}
         ${PLATFORM_SETTINGS_FILE}
-        ${GENERATED_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    DEPENDS ${GENERATOR_INPUTS}
-    COMMENT "Generating mEEM configuration files to ${GENERATED_DIR}"
-    VERBATIM
-)
+        ${CMAKE_SOURCE_DIR}/tools/meem_config_gen/meem_config_gen.py
+        ${CMAKE_SOURCE_DIR}/uv.lock
+    )
 
-#------------------------------------------------------------------------------
-# mEEM-GenConfig: Generated configuration files
-#------------------------------------------------------------------------------
-add_library(mEEM-GenConfig)
+    # Create the generated directory
+    file(MAKE_DIRECTORY ${GENERATED_DIR})
 
-target_sources(mEEM-GenConfig
-    PRIVATE
-        ${GENERATED_FILES}
-)
+    # Custom command to generate mEEM configuration files
+    add_custom_command(
+        OUTPUT ${GENERATED_FILES}
+        COMMAND ${UV_EXECUTABLE} run --project ${CMAKE_SOURCE_DIR}
+            ${CMAKE_SOURCE_DIR}/tools/meem_config_gen/meem_config_gen.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/${DATAMODEL}
+            ${PLATFORM_SETTINGS_FILE}
+            ${GENERATED_DIR}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        DEPENDS ${GENERATOR_INPUTS}
+        COMMENT "Generating mEEM configuration files to ${GENERATED_DIR}"
+        VERBATIM
+    )
 
-target_include_directories(mEEM-GenConfig
-    PUBLIC
-        ${GENERATED_DIR}
-)
+    # mEEM-GenConfig: Generated configuration files
+    add_library(mEEM-GenConfig${SUFFIX})
 
-target_link_libraries(mEEM-GenConfig
-    PUBLIC
-      mEEM-Internal
-    PRIVATE
-      mEEM-RequiredInterface
-)
+    target_sources(mEEM-GenConfig${SUFFIX}
+        PRIVATE
+            ${GENERATED_FILES}
+    )
 
-# Custom target for explicit generation
-add_custom_target(generate-meem-config
-    DEPENDS ${GENERATED_FILES}
-    COMMENT "Ensure mEEM configuration files are generated"
-)
+    target_include_directories(mEEM-GenConfig${SUFFIX}
+        PUBLIC
+            ${GENERATED_DIR}
+    )
 
-#------------------------------------------------------------------------------
-# mEEM-UserConfig: User-written configuration files 
-#------------------------------------------------------------------------------
-add_library(mEEM-UserConfig)
+    target_link_libraries(mEEM-GenConfig${SUFFIX}
+        PUBLIC
+          mEEM-Internal
+        PRIVATE
+          mEEM-RequiredInterface
+    )
 
-target_sources(mEEM-UserConfig
-    PRIVATE
-        ../crc/CRC.c
-        MEEM_Checksum.cpp
-        MEEM_EEAIF.cpp
-        MEEM_UserCallbacks.cpp
-)
+    # Custom target for explicit generation
+    add_custom_target(generate-meem-config${SUFFIX}
+        DEPENDS ${GENERATED_FILES}
+        COMMENT "Ensure mEEM configuration files are generated"
+    )
 
-target_include_directories(mEEM-UserConfig
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/../crc
-        ${CMAKE_SOURCE_DIR}/test/eeprom_simulator
-        ${CMAKE_SOURCE_DIR}/test/mocks
-)
+    # mEEM-UserConfig: User-written configuration files
+    add_library(mEEM-UserConfig${SUFFIX})
 
-target_link_libraries(mEEM-UserConfig
-    PRIVATE
-        mEEM-GenConfig
-        mEEM-ProvidedInterface
-        mEEM-RequiredInterface
-        gmock
-)
+    target_sources(mEEM-UserConfig${SUFFIX}
+        PRIVATE
+            ../crc/CRC.c
+            MEEM_Checksum.cpp
+            MEEM_EEAIF.cpp
+            MEEM_UserCallbacks.cpp
+    )
 
-#------------------------------------------------------------------------------
-# mEEM-Config: Combined interface
-#------------------------------------------------------------------------------
-add_library(mEEM-Config INTERFACE)
+    target_include_directories(mEEM-UserConfig${SUFFIX}
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/../crc
+            ${CMAKE_SOURCE_DIR}/test/eeprom_simulator
+            ${CMAKE_SOURCE_DIR}/test/mocks
+    )
 
-target_link_libraries(mEEM-Config
-    INTERFACE
-        mEEM-GenConfig
-        mEEM-UserConfig
-)
+    target_link_libraries(mEEM-UserConfig${SUFFIX}
+        PRIVATE
+            mEEM-GenConfig${SUFFIX}
+            mEEM-ProvidedInterface
+            mEEM-RequiredInterface
+            gmock
+    )
+
+    # mEEM-Config: Combined interface
+    add_library(mEEM-Config${SUFFIX} INTERFACE)
+
+    target_link_libraries(mEEM-Config${SUFFIX}
+        INTERFACE
+            mEEM-GenConfig${SUFFIX}
+            mEEM-UserConfig${SUFFIX}
+    )
+endfunction()
+
+# Main test configuration, using all block management types
+meem_add_test_config("" eeprom_datamodel.json)
+
+# Multi-profile blocks only. Some code paths are compiled in/out depending on the
+# used block management types, so they can't be covered by the main configuration.
+meem_add_test_config("-MultiProfileOnly" eeprom_datamodel_multi_profile_only.json)

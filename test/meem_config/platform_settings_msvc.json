@@ -1,6 +1,6 @@
 {
     "endianness": "little",
-    "eeprom_size": 512,
+    "eeprom_size": 1024,
     "eeprom_page_size": 32,
     "page_aligned_blocks": [
         "*"

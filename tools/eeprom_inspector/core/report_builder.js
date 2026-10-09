@@ -83,14 +83,12 @@
             const numArray = [];
             let offs = offset;
             for (let m = 0; m < multiplicity; m++) {
-                const raw = this.getRawValue(offs, dt);
-                // Faithful to the Python: the hex string is the raw bytes in
-                // reversed memory order (i.e. correct for little-endian).
-                let hex = '';
-                for (let b = raw.length - 1; b >= 0; b--) hex += toHexByte(raw[b]);
+                // The hex string shows the most significant byte first, whatever the byte order in memory
+                const hexBytes = Array.from(this.getRawValue(offs, dt), toHexByte);
+                if (this.littleEndian) hexBytes.reverse();
                 numArray.push({
                     value_dec: String(this.getNormalValue(offs, dt)),
-                    value_hex: '0x' + hex,
+                    value_hex: '0x' + hexBytes.join(''),
                     address: formatAddress(offs),
                 });
                 offs += size;

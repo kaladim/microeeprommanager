@@ -19,9 +19,10 @@
 /******************************************************************************/
 /*    Internal variables                                                      */
 /******************************************************************************/
-MEEM_globalStatus_t       MEEM_global_status;
-MEEM_blockStatusPrivate_t MEEM_block_status[MEEM_BLOCK_COUNT];
-uint8_t                   MEEM_work_buffer[MEEM_WORKBUFFER_SIZE];
+/* Explicitly initialized to get strong definitions instead of 'common' symbols, which AddressSanitizer can't guard reliably */
+MEEM_globalStatus_t       MEEM_global_status                     = {0};
+MEEM_blockStatusPrivate_t MEEM_block_status[MEEM_BLOCK_COUNT]    = {0};
+uint8_t                   MEEM_work_buffer[MEEM_WORKBUFFER_SIZE] = {0};
 
 /******************************************************************************/
 /*    Internal operations                                                     */
@@ -130,7 +131,7 @@ void MEEM_StartWriteOperationCachedBlock(uint8_t block_id)
         MEEM_global_status.io_request.offset_in_eeprom = 0;
         block_status->index_of_active_instance         = 0;
     }
-#if ((MEEM_USING_BACKUP_COPY_BLOCKS == true) || (MEEM_USING_WEAR_LEVELING_BLOCKS == true))
+#if ((MEEM_USING_MULTI_PROFILE_BLOCKS == true) || (MEEM_USING_WEAR_LEVELING_BLOCKS == true))
     else
     {
         MEEM_global_status.io_request.offset_in_eeprom = (sizeof(MEEM_checksum_t) + block_cfg->data_size) * (uint16_t) block_status->index_of_active_instance;
@@ -218,11 +219,11 @@ MEEM_ioStage_t MEEM_WriteWaitToComplete(void)
 
     switch (EEAIF_GetStatus())
     {
-        case MEEM_OK:
+        case EEAIF_OK:
             next_stage = MEEM_IO_FINALIZE;
             break;
 
-        case MEEM_NOK:
+        case EEAIF_NOK:
             MEEM_block_status[MEEM_global_status.block_id].write_failed = true;
             next_stage                                                  = MEEM_IO_FINALIZE;
             break;
@@ -301,25 +302,23 @@ void MEEM_RestoreDefaults(uint8_t block_id)
     const MEEM_blockConfig_t* block_cfg              = &MEEM_block_config[block_id];
     uint8_t                   default_pattern_length = block_cfg->default_pattern_length;
 
+    /* Keep the sequence counter of wear-leveling blocks intact, otherwise the next written instance won't be recognized as the most recent one */
+    uint16_t offset    = (block_cfg->management_type == MEEM_MGMT_WEAR_LEVELING) ? 1u : 0u;
+    uint16_t data_size = (block_cfg->data_size - offset);
+
     if (default_pattern_length == 0)
     {
-        (void) memcpy(block_cfg->cache, block_cfg->defaults, block_cfg->data_size);
+        (void) memcpy(&block_cfg->cache[offset], &block_cfg->defaults[offset], data_size);
+    }
+    else if (default_pattern_length == 1)
+    {
+        (void) memset(&block_cfg->cache[offset], block_cfg->defaults[0], data_size);
     }
     else
     {
-        uint16_t offset    = (block_cfg->management_type == MEEM_MGMT_WEAR_LEVELING) ? 1u : 0u;
-        uint16_t data_size = (block_cfg->data_size - offset);
-
-        if (default_pattern_length == 1)
+        for (; offset < data_size; offset += (uint16_t) default_pattern_length)
         {
-            (void) memset(&block_cfg->cache[offset], block_cfg->defaults[0], data_size);
-        }
-        else
-        {
-            for (; offset < data_size; offset += (uint16_t) default_pattern_length)
-            {
-                (void) memcpy(&block_cfg->cache[offset], block_cfg->defaults, (size_t) default_pattern_length);
-            }
+            (void) memcpy(&block_cfg->cache[offset], block_cfg->defaults, (size_t) default_pattern_length);
         }
     }
 }

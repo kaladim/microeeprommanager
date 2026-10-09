@@ -104,10 +104,11 @@ bool MEEM_InitiateSwitchToProfile(uint8_t block_id, uint8_t target_profile_id)
     MEEM_EnterCriticalSection();
     if (MEEM_global_status.accept_new_requests && !block_status->fetch_pending && (target_profile_id != block_status->index_of_active_instance))
     {
-        block_status->index_of_active_instance = target_profile_id;
-        block_status->recovered                = false;
-        block_status->fetch_pending            = true;
-        accepted                               = true;
+        /* Not activated yet: a pending write must still go to the currently active profile */
+        block_status->index_of_requested_profile = target_profile_id;
+        block_status->recovered                  = false;
+        block_status->fetch_pending              = true;
+        accepted                                 = true;
     }
     MEEM_ExitCriticalSection();
     return accepted;
@@ -116,5 +117,9 @@ bool MEEM_InitiateSwitchToProfile(uint8_t block_id, uint8_t target_profile_id)
 bool MEEM_IsMultiProfileBlockReady(uint8_t block_id)
 {
     assert(MEEM_MGMT_MULTI_PROFILE == MEEM_block_config[block_id].management_type);
-    return !MEEM_block_status[block_id].fetch_pending;
+
+    /* The fetch request is cleared when the fetch starts, but the cache is populated when it completes */
+    bool fetch_ongoing = (MEEM_OPR_INIT == MEEM_global_status.current_operation) && (block_id == MEEM_global_status.block_id);
+
+    return !MEEM_block_status[block_id].fetch_pending && !fetch_ongoing;
 }

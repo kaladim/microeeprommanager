@@ -3,7 +3,7 @@ import sys
 
 sys.path.append(os.path.dirname(__file__))
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from typing import Dict, List
+from typing import Dict, List, Optional
 from datetime import datetime
 from common.data_model import *
 from common.platform_settings import PlatformSettings
@@ -157,10 +157,7 @@ class CodeGen_MEEM(CodeGenerator):
         txt += '#include "MEEM_Internal.h"\n'
         txt += '#include "MEEM_GenInterface.h"\n'
         txt += "#include <assert.h>\n"
-
-        for hdr in self._settings.external_headers:
-            txt += f"#include {hdr}\n"
-
+        # The external headers are already included by MEEM_GenConfig.h
         txt += "\n"
         txt += self.to_comment_box("   Validation routines", self.TextAlignment.Left) + "\n"
         txt += self.generate_config_validator_function() + "\n"
@@ -412,17 +409,17 @@ class CodeGen_MEEM(CodeGenerator):
 
             if len(param.children) > 0:
                 for i in range(0, param.multiplicity):
-                    txt += f"        {{ {self.init_field('all')}{self.to_str(param.default_value[i])} }},\n"
+                    txt += f"        {{ {self.init_field('all')}{self.to_str(param.default_value[i], param.data_type)} }},\n"
                 txt = self.remove_last_occurrence_of(",", txt)
             else:
-                txt += "        " + ", ".join([self.to_str(d) for d in param.default_value]) + "\n"
+                txt += "        " + ", ".join([self.to_str(d, param.data_type) for d in param.default_value]) + "\n"
 
             txt += "    },\n"
         else:
             if len(param.children) > 0:
-                txt += f"{{ {self.init_field('all')}{self.to_str(param.default_value[0])} }},\n"
+                txt += f"{{ {self.init_field('all')}{self.to_str(param.default_value[0], param.data_type)} }},\n"
             else:
-                txt += self.to_str(param.default_value[0]) + ",\n"
+                txt += self.to_str(param.default_value[0], param.data_type) + ",\n"
 
         return txt
 
@@ -504,9 +501,10 @@ class CodeGen_MEEM(CodeGenerator):
     def calculate_workbuffer_size(self) -> int:
         return self._datamodel.checksum_size + max([b.data_size for b in self._datamodel.children])
 
-    def to_str(self, value: int | float) -> str:
+    def to_str(self, value: int | float, data_type: Optional[Parameter.DataTypes] = None) -> str:
         if isinstance(value, float):
-            return str(value) + ("" if value > 3.4028235e38 else "f")
+            # Only 'float' literals need the suffix. Otherwise a 'double' would get initialized with a single-precision value.
+            return str(value) + ("f" if data_type == Parameter.DataTypes.float32 else "")
 
         return str(value) if (value < 10) else f"0x{value:X}"
 

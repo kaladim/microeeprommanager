@@ -104,9 +104,8 @@ void MEEM_InitializeBackupCopyBlock(uint8_t block_id)
                         init_stage = MEEM_INIT_READY;
                         break;
                     case 0:
-                        /* Both invalid, repair. */
-                        block_status->write_pending = true; /* The write procedure will update both copies. */
-                        init_stage                  = MEEM_INIT_RECOVER_DATA;
+                        /* Both invalid. Whether to repair them is up to the configured data recovery strategy. */
+                        init_stage = MEEM_INIT_RECOVER_DATA;
                         break;
                     default:
                         /* Only one is valid, repair. */

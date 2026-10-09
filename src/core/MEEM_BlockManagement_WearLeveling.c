@@ -51,6 +51,7 @@ static inline uint8_t MEEM_FindIndexOfMaxElement(const uint8_t array[], uint8_t 
 /******************************************************************************/
 /*    Internal operations                                                     */
 /******************************************************************************/
+#if (MEEM_USING_WEAR_LEVELING_BLOCKS == true) /* Otherwise MEEM_MAX_WL_INSTANCE_COUNT is 0 */
 /*!
  * \brief     Initializes a wear-leveling block.
  * \note      This is a synchronous (blocking) operation!
@@ -183,6 +184,7 @@ void MEEM_InitializeWearLevelingBlock(uint8_t block_id)
         }
     } while (MEEM_INIT_READY != init_stage);
 }
+#endif
 
 uint8_t MEEM_FindIndexOfMostRecentInstance(const uint8_t sequence_counters[], uint8_t instance_count)
 {

@@ -106,6 +106,47 @@ TEST_F(WearLevelingBlocksTest, MostRecentValidInstanceNormalWay)
     }
 }
 
+TEST_F(WearLevelingBlocksTest, RestoredDefaultsAreLoadedAfterReinit)
+{
+    auto wl_blocks_ids = FilterBlocksByManagementType(MEEM_MGMT_WEAR_LEVELING);
+
+    for (auto block_id : wl_blocks_ids)
+    {
+        const auto block_config = &MEEM_block_config[block_id];
+
+        // The search for the most recent instance depends on the sequence counters of all instances, so try various write cycle counts
+        for (size_t write_cycles_count = 0; write_cycles_count <= (2u * block_config->instance_count); write_cycles_count++)
+        {
+            SCOPED_TRACE("Block ID: " + std::to_string(block_id) + ", write cycles: " + std::to_string(write_cycles_count));
+
+            eep_sim->erase();
+            MEEM_DeInit();
+            MEEM_Init();
+            MEEM_Resume();
+            ProcessMeemUntilIdle();
+
+            for (size_t i = 0; i < write_cycles_count; i++)
+            {
+                ChangeAllDataInBlock(block_id);
+                ASSERT_TRUE(MEEM_InitiateBlockWrite(block_id));
+                ProcessMeemUntilIdle();
+            }
+
+            const uint8_t sequence_counter = block_config->cache[0];
+            MEEM_RestoreDefaults(block_id);
+            EXPECT_EQ(sequence_counter, block_config->cache[0]) << "The sequence counter is not a default value";
+
+            const std::vector<uint8_t> defaults(&block_config->cache[1], &block_config->cache[block_config->data_size]);
+            ASSERT_TRUE(MEEM_InitiateBlockWrite(block_id));
+            ProcessMeemUntilIdle();
+
+            MEEM_DeInit();
+            MEEM_Init();
+            EXPECT_TRUE(std::equal(defaults.cbegin(), defaults.cend(), &block_config->cache[1])) << "Initialized from an older instance";
+        }
+    }
+}
+
 TEST_F(WearLevelingBlocksTest, FindingMostRecentValidInstanceAmongMinimumAmountOfInstances)
 {
     constexpr std::array<TestData<2>, 7> test_data_2_instances{{{{0xff, 0xff}, 0xff}, // No valid index at all

@@ -79,6 +79,37 @@ TEST_F(BackupCopyBlockTest, InitFromJustOneValidInstance)
     }
 }
 
+TEST_F(BackupCopyBlockTest, BothInstancesInvalidAreRepairedOnlyIfConfigured)
+{
+    std::vector<uint8_t> backup_blocks_ids = FilterBlocksByManagementType(MEEM_MGMT_BACKUP_COPY);
+
+    if (std::none_of(backup_blocks_ids.cbegin(), backup_blocks_ids.cend(),
+                     [](uint8_t id) { return MEEM_block_config[id].data_recovery_strategy == MEEM_RECOVER_DEFAULTS; }))
+    {
+        throw std::runtime_error("Your test configuration doesn't contain backup copy blocks with 'recover defaults' strategy. But it needs at least 1!");
+    }
+
+    for (auto block_id : backup_blocks_ids)
+    {
+        SCOPED_TRACE("Block ID: " + std::to_string(block_id));
+
+        const auto block_cfg = &MEEM_block_config[block_id];
+        const bool repair    = (block_cfg->data_recovery_strategy == MEEM_RECOVER_DEFAULTS_AND_REPAIR);
+
+        eep_sim->erase();
+        MEEM_DeInit();
+        MEEM_Init();
+        EXPECT_TRUE(MEEM_GetBlockStatus(block_id).recovered);
+        EXPECT_EQ(repair, static_cast<bool>(MEEM_GetBlockStatus(block_id).write_pending));
+
+        ProcessMeemUntilIdle();
+
+        const auto area_begin = eep_sim->eeprom.cbegin() + block_cfg->offset_in_eeprom;
+        const auto area_end   = area_begin + ((block_cfg->data_size + sizeof(MEEM_checksum_t)) * block_cfg->instance_count);
+        EXPECT_EQ(!repair, std::all_of(area_begin, area_end, [](uint8_t b) { return b == EepromSimulator::erased_state; }));
+    }
+}
+
 TEST_F(BackupCopyBlockTest, EnsureBothInstancesWritten)
 {
     MEEM_Init();

@@ -73,12 +73,12 @@ void MEEM_DeInit(void)
     EEAIF_DeInit();
 
     memset(&MEEM_global_status, 0, sizeof(MEEM_global_status));
+    memset(MEEM_block_status, 0, sizeof(MEEM_block_status));
     memset(MEEM_work_buffer, 0, sizeof(MEEM_work_buffer));
 
     for (uint8_t i = 0; i < MEEM_BLOCK_COUNT; i++)
     {
         memset(MEEM_block_config[i].cache, 0, MEEM_block_config[i].data_size);
-        memset(&MEEM_block_status[i], 0, sizeof(MEEM_block_status));
     }
 }
 
@@ -190,7 +190,11 @@ static void MEEM_TryProcessNextRequest(void)
 #if (MEEM_USING_MULTI_PROFILE_BLOCKS == true)
             else if (MEEM_block_status[i].fetch_pending)
             {
-                MEEM_block_status[i].fetch_pending   = false;
+                MEEM_EnterCriticalSection();
+                MEEM_block_status[i].index_of_active_instance = MEEM_block_status[i].index_of_requested_profile;
+                MEEM_block_status[i].fetch_pending            = false;
+                MEEM_ExitCriticalSection();
+
                 MEEM_global_status.current_operation = MEEM_OPR_INIT;
 
                 MEEM_StartReadOperation(i);

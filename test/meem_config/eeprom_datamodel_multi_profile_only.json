@@ -1,0 +1,56 @@
+{
+    "name": "MEEM_test_configuration_multi_profile_only",
+    "description": "Minimal configuration with multi-profile blocks only (no basic, backup copy or wear-leveling blocks). Exercises code paths, which are compiled differently when only some block management types are in use.",
+    "children": [
+        {
+            "name": "Block_MultiProfile_0",
+            "description": "Some optional description...",
+            "children": [
+                {
+                    "name": "param",
+                    "description": "Some optional description...",
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 5,
+                    "default_value": [
+                        186,
+                        186,
+                        186,
+                        186,
+                        186
+                    ]
+                }
+            ],
+            "management_type": 2,
+            "instance_count": 3,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block_MultiProfile_1",
+            "description": "Not the first block - its offset in the EEPROM is not 0.",
+            "children": [
+                {
+                    "name": "param",
+                    "description": "Some optional description...",
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 6,
+                    "default_value": [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        5
+                    ]
+                }
+            ],
+            "management_type": 2,
+            "instance_count": 4,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        }
+    ],
+    "checksum_size": 1
+}

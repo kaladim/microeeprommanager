@@ -26,6 +26,6 @@ uv run ./tools/eeprom_image_gen/eeprom_image_gen.py \
 | `<DATAMODEL>`  | ✅        | Path to `datamodel.json` (mEEM configuration)                                                               |
 | `<SETTINGS>`   | ✅        | Path to `platform_settings.json` (mEEM configuration)                                                       |
 | `<CHECKSUM>`   | ✅        | Path to `checksum_parameters.json`                                                                          |
-| `<ADDRESS>`    | ⚪        | Base address of the image. Hex format only, with leading `0x`. Defaults to 0 if not specified.              |
+| `<ADDRESS>`    | ⚪        | Base address of the image. Hex format only, with leading `0x`. Defaults to `0x0` if not specified.          |
 | `<FILL>`       | ⚪        | Fill byte for unused EEPROM space. Hex format only, with leading `0x`. Defaults to `0xFF` if not specified. |
 | `<OUTPUT_DIR>` | ⚪        | Output directory for generated EEPROM image. Defaults to `./` if not specified                              |

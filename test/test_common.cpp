@@ -68,6 +68,26 @@ TEST_F(TestCommon, InitFromPreviouslyValidEeprom)
     }
 }
 
+TEST_F(TestCommon, DeInitClearsStatusOfAllBlocks)
+{
+    MEEM_DeInit();
+    MEEM_Init();
+    ProcessMeemUntilIdle();
+    MEEM_Resume();
+
+    // Leave a non-zero status in every block
+    for (uint8_t block_id = 0; block_id < MEEM_BLOCK_COUNT; block_id++)
+    {
+        EXPECT_TRUE(MEEM_InitiateBlockWrite(block_id));
+    }
+
+    // Writing past the end of MEEM_block_status is reported by AddressSanitizer (MEEM_TEST_ENABLE_ASAN)
+    MEEM_DeInit();
+
+    const auto status_bytes = reinterpret_cast<const uint8_t*>(MEEM_block_status);
+    EXPECT_TRUE(std::all_of(status_bytes, status_bytes + sizeof(MEEM_block_status), [](uint8_t b) { return b == 0; }));
+}
+
 TEST_F(TestCommon, EnsureProcessingStartsAlwaysFromBlock0)
 {
     MEEM_DeInit();

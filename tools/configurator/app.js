@@ -295,23 +295,6 @@ function createCustomSelect(options, currentValue, onChange) {
     return wrap;
 }
 
-// Number parsing helper (used throughout): accepts numbers, decimal strings, hex (0x...), and numeric strings
-function parseNumberTokenForModel(token, preferredTypeHint) {
-    // preferredTypeHint may be 'float' or 'int' or a DataTypes value
-    if (token === null || token === undefined) return token;
-    if (typeof token === 'number' || typeof token === 'bigint') return token;
-    if (typeof token !== 'string') return token;
-    const s = token.trim(); if (s === '') return 0;
-    // hex
-    if (/^[-+]?0x[0-9a-fA-F]+$/.test(s)) {
-        try { return BigInt(s); } catch (e) { return Number(s); }
-    }
-    // float
-    if (s.includes('.') || preferredTypeHint === 'float') { const f = parseFloat(s); return isNaN(f) ? 0 : f }
-    // integer decimal - try BigInt, fallback to Number
-    try { return BigInt(s); } catch (e) { const n = Number(s); return isNaN(n) ? 0 : n }
-}
-
 // Normalize a node name: replace invalid characters with underscore and ensure leading char is a letter or underscore
 function normalizeName(s) {
     if (s === null || s === undefined) return '';
@@ -341,31 +324,6 @@ function blockNameExists(name, excludePath) {
     return false;
 }
 
-// Restore numeric typed values after loading JSON: convert objects where values were serialized as strings
-function restoreNumericTypesAfterLoad(obj) {
-    if (!obj || typeof obj !== 'object') return;
-    // Walk recursively and convert string-looking numbers into Number/BigInt when appropriate
-    const stack = [obj];
-    while (stack.length) {
-        const cur = stack.pop();
-        for (const k of Object.keys(cur)) {
-            const v = cur[k];
-            if (v && typeof v === 'object') { stack.push(v); continue }
-            if (typeof v === 'string') {
-                // Handle NaN string conversion
-                if (v.trim().toLowerCase() === 'nan') {
-                    cur[k] = NaN;
-                    continue;
-                }
-                // Heuristic: if string looks like integer or hex, convert to BigInt/Number
-                if (/^[-+]?(0x[0-9a-fA-F]+|\d+)$/.test(v.trim())) {
-                    cur[k] = parseNumberTokenForModel(v);
-                }
-            }
-        }
-    }
-}
-
 // Default factories
 function makeEmptyDataModel() { return { name: '', description: '', checksum_size: 1, children: [] } }
 function makeEmptyBlock() { return { name: '', description: '', children: [], management_type: ManagementTypes.Basic, instance_count: 1, data_recovery_strategy: 0, compress_defaults: true } }
@@ -392,7 +350,7 @@ const JSON_PICKER_TYPES = [{ description: 'JSON file', accept: { 'application/js
 
 // Parse/validate handlers, decoupled from how the text was obtained (picker or <input>).
 function processDataModelText(text, name) {
-    const raw = JSON.parse(text);
+    const raw = parseConfigJson(text);
     state.dataModel = raw;
     restoreNumericTypesAfterLoad(state.dataModel);
     validateDataModelLoad();
@@ -402,7 +360,7 @@ function processDataModelText(text, name) {
 }
 
 function processPlatformText(text, name) {
-    const raw = JSON.parse(text);
+    const raw = parseConfigJson(text);
     state.platformSettings = raw;
     restoreNumericTypesAfterLoad(state.platformSettings);
     validatePlatformLoad();
@@ -411,7 +369,7 @@ function processPlatformText(text, name) {
 }
 
 function processChecksumText(text, name) {
-    const raw = JSON.parse(text);
+    const raw = parseConfigJson(text);
     state.checksumSettings = raw;
     restoreNumericTypesAfterLoad(state.checksumSettings);
     setStatus('Loaded checksum settings file: ' + name);
@@ -877,27 +835,6 @@ function bigintReplacer(key, value) {
     if (typeof value === 'bigint') return value.toString();
     if (typeof value === 'number' && isNaN(value)) return "NaN";
     return value;
-}
-
-// Serialize an object to JSON while emitting BigInt values as bare number
-// literals (e.g. 186) instead of quoted strings. Integer values are kept as
-// BigInt internally to preserve full 64-bit precision, but JSON.stringify cannot
-// output BigInt directly, so each one is wrapped in a NUL-delimited sentinel and
-// the quotes the serializer adds around it are stripped afterwards. NUL chars can
-// never appear unescaped in JSON output, so the sentinel cannot collide with real
-// string data. NaN floats are still emitted as the string "NaN" (JSON has no NaN).
-function stringifyConfig(obj, space) {
-    const bigints = [];
-    const json = JSON.stringify(obj, (key, value) => {
-        if (typeof value === 'bigint') {
-            const token = `\u0000BIGINT${bigints.length}\u0000`;
-            bigints.push(value.toString());
-            return token;
-        }
-        if (typeof value === 'number' && isNaN(value)) return "NaN";
-        return value;
-    }, space);
-    return json.replace(/"\\u0000BIGINT(\d+)\\u0000"/g, (m, i) => bigints[Number(i)]);
 }
 
 // --- Serialization (independent of the destination) -----------------------

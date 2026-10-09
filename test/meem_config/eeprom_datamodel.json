@@ -173,6 +173,55 @@
             "instance_count": 2,
             "data_recovery_strategy": 0,
             "compress_defaults": true
+        },
+        {
+            "name": "Block_WearLeveling_2",
+            "description": "Defaults without a recurring pattern",
+            "children": [
+                {
+                    "name": "param",
+                    "description": "Some optional description...",
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 6,
+                    "default_value": [
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        6
+                    ]
+                }
+            ],
+            "management_type": 3,
+            "instance_count": 3,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block_BackupCopy_2",
+            "description": "Recovers defaults without repairing the EEPROM",
+            "children": [
+                {
+                    "name": "param",
+                    "description": "Some optional description...",
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 5,
+                    "default_value": [
+                        1,
+                        2,
+                        3,
+                        4,
+                        5
+                    ]
+                }
+            ],
+            "management_type": 1,
+            "instance_count": 2,
+            "data_recovery_strategy": 1,
+            "compress_defaults": true
         }
     ],
     "checksum_size": 1

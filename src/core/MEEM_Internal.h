@@ -97,14 +97,14 @@ typedef struct {
 
 /** Runtime block status */
 typedef struct {
-    uint8_t recovered                : 1; /**< Set by the core once if initialization fails and the cache is populated with defaults */
-    uint8_t write_complete           : 1; /**< Set by the core when a write operation completes. Cleared at the start of operation */
-    uint8_t write_failed             : 1; /**< Set once by the core when a write operation fails */
-    uint8_t write_pending            : 1; /**< Set by the user to initiate a write in the EEPROM */
-    uint8_t fetch_pending            : 1; /**< Set by the core when the user requests a read from the EEPROM. */
-    uint8_t reserved_0               : 3;
-    uint8_t index_of_active_instance : 4;
-    uint8_t reserved_1               : 4;
+    uint8_t recovered                  : 1; /**< Set by the core once if initialization fails and the cache is populated with defaults */
+    uint8_t write_complete             : 1; /**< Set by the core when a write operation completes. Cleared at the start of operation */
+    uint8_t write_failed               : 1; /**< Set once by the core when a write operation fails */
+    uint8_t write_pending              : 1; /**< Set by the user to initiate a write in the EEPROM */
+    uint8_t fetch_pending              : 1; /**< Set by the core when the user requests a read from the EEPROM. */
+    uint8_t reserved_0                 : 3;
+    uint8_t index_of_active_instance   : 4;
+    uint8_t index_of_requested_profile : 4; /**< Multi-profile blocks only: target of a requested switch. Becomes active when its fetch starts */
 } MEEM_blockStatusPrivate_t;
 
 /** Block's static configuration */

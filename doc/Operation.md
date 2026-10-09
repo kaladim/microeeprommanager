@@ -53,7 +53,7 @@ On write, *always both* EEPROM instances are written.
 With these blocks, only one EEPROM instance (i.e. the `active profile`) can be used at a time, just like a *Basic* block, but the instance is selectable at runtime.  
 If the `active profile` needs to be switched, a wait is required (while the new instance is being fetched). The block is unusable during the switch-over.  
 On initialization, the user is required to provide an ID of the initially selected profile via [callback](../src/required_interface/MEEM_UserCallbacks.h#29).  
-On write, only the `active profile` is written to the EEPROM.  
+On write, only the `active profile` is written to the EEPROM. A write requested before a switch-over is completed first, so it still goes to the previously active profile.  
 ![Memory-layout-MultiProfile](./Memory-layout-MultiProfile.png)
 
 ### Wear-leveling

@@ -97,6 +97,7 @@ EXTERN_C MEEM_blockStatus_t MEEM_GetBlockStatus(uint8_t block_id);
 /*------------------------ Control API for 'multi-profile' blocks ------------------*/
 /*!
  * \brief     Retrieves the index of currently active profile of a 'multi-profile' block.
+ * \note      A profile requested by #MEEM_InitiateSwitchToProfile() becomes active when its fetch starts.
  * \param[in] block_id ID of the multi-profile block.
  * \retval    [0..14] index/ID of currently active profile. The maximal value depends on configured instance count.
  */
@@ -105,6 +106,7 @@ EXTERN_C uint8_t MEEM_GetActiveProfile(uint8_t block_id);
 /*!
  * \brief     Initiates switch to a profile in a 'multi-profile' block.
  * \note      Switchover is not guaranteed to start immediately - it depends on count of waiting blocks.
+ * \note      A pending write request of the block is processed first and goes to the currently active profile.
  * \param[in] block_id ID of the multi-profile block
  * \param[in] target_profile_id ID of the profile. The maximum value depends on configured instance count.
  * \retval    true If the request is accepted and the switchover is initiated
