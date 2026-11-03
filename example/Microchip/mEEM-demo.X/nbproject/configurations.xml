@@ -20,9 +20,6 @@
         <itemPath>../Applications/AppC.c</itemPath>
         <itemPath>../Applications/AppD.c</itemPath>
       </logicalFolder>
-      <logicalFolder name="CRC" displayName="CRC" projectFiles="true">
-        <itemPath>../CRC/CRC.c</itemPath>
-      </logicalFolder>
       <logicalFolder name="EEPROM_Driver_PIC16F"
                      displayName="EEPROM_Driver_PIC16F"
                      projectFiles="true">
@@ -36,6 +33,8 @@
           <itemPath>../../../src/core/MEEM_BlockManagement_Common.c</itemPath>
           <itemPath>../../../src/core/MEEM_BlockManagement_MultiProfile.c</itemPath>
           <itemPath>../../../src/core/MEEM_BlockManagement_WearLeveling.c</itemPath>
+          <itemPath>../../../src/core/MEEM_CRC.c</itemPath>
+          <itemPath>../../../src/core/MEEM_Legacy.c</itemPath>
         </logicalFolder>
         <logicalFolder name="provided_interface"
                        displayName="provided_interface"
@@ -50,8 +49,8 @@
         <logicalFolder name="generated" displayName="generated" projectFiles="true">
           <itemPath>../MEEM_Config/generated/MEEM_GenConfig.c</itemPath>
           <itemPath>../MEEM_Config/generated/MEEM_GenInterface.c</itemPath>
+          <itemPath>../MEEM_Config/generated/MEEM_Migration.c</itemPath>
         </logicalFolder>
-        <itemPath>../MEEM_Config/MEEM_Checksum.c</itemPath>
         <itemPath>../MEEM_Config/MEEM_EEAIF.c</itemPath>
         <itemPath>../MEEM_Config/MEEM_UserCallbacks.c</itemPath>
       </logicalFolder>
@@ -77,11 +76,11 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>noID</platformTool>
         <languageToolchain>XC8</languageToolchain>
-        <languageToolchainVersion>2.41</languageToolchainVersion>
+        <languageToolchainVersion>4.00</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC12-16F1xxx_DFP" vendor="Microchip" version="1.8.254"/>
+        <pack name="PIC12-16F1xxx_DFP" vendor="Microchip" version="1.9.258"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -119,7 +118,7 @@
         <property key="define-macros" value="NDEBUG"/>
         <property key="disable-optimizations" value="false"/>
         <property key="extra-include-directories"
-                  value="..;..\CRC;..\MEEM_Config;..\MEEM_Config\generated;..\EEPROM_Driver_PIC16F;..\Applications;..\..\..\src\core;..\..\..\src\provided_interface;..\..\..\src\required_interface"/>
+                  value="..;..\MEEM_Config;..\MEEM_Config\generated;..\EEPROM_Driver_PIC16F;..\Applications;..\..\..\src\core;..\..\..\src\provided_interface;..\..\..\src\required_interface"/>
         <property key="favor-optimization-for" value="-speed,+space"/>
         <property key="garbage-collect-data" value="true"/>
         <property key="garbage-collect-functions" value="true"/>

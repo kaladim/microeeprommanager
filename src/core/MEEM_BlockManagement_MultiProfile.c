@@ -23,6 +23,34 @@
 /******************************************************************************/
 /*    Internal operations                                                     */
 /******************************************************************************/
+#if (MEEM_USING_MULTI_PROFILE_BLOCKS == true)
+/*!
+ * \brief     Selects the initially active profile of a block in #MEEM_Init(), if it's a multi-profile block.
+ * \param[in] block_id - ID of the block
+ */
+void MEEM_SelectInitialProfile(uint8_t block_id)
+{
+    if (MEEM_MGMT_MULTI_PROFILE == MEEM_block_config[block_id].management_type)
+    {
+        MEEM_block_status[block_id].index_of_active_instance = MEEM_SelectInitiallyActiveProfile(block_id);
+    }
+}
+#endif
+
+/*!
+ * \brief     Initializes a multi-profile block: loads its active profile into the cache.
+ * \note      This is a synchronous (blocking) operation!
+ * \param[in] block_id - ID of the block to initialize, whose active profile is already selected
+ */
+void MEEM_InitializeMultiProfileBlock(uint8_t block_id)
+{
+    MEEM_StartReadOperation(block_id);
+
+    while (false == MEEM_InitMultiProfileBlockTask())
+    {
+    }
+}
+
 /*!
  * \brief    State machine of multi-profile block initialization.
  * \retval   true if init completed
@@ -36,27 +64,16 @@ bool MEEM_InitMultiProfileBlockTask(void)
             switch (MEEM_ReadOperationTask())
             {
                 case MEEM_OK:
-                    MEEM_global_status.init_stage = MEEM_INIT_EVALUATE_INSTANCE;
+                    MEEM_global_status.init_stage = MEEM_INIT_CACHE;
                     break;
 
-                case MEEM_NOK:
-                    /* Can't read the EEPROM, continue with default values */
-                    MEEM_global_status.init_stage = MEEM_INIT_RECOVER_DATA;
-                    break;
+                case MEEM_BUSY:
+                    break; /* Still busy */
 
                 default:
-                    break; /* Still busy */
-            }
-            break;
-
-        case MEEM_INIT_EVALUATE_INSTANCE:
-            if (MEEM_IsDataValid(MEEM_global_status.block_id))
-            {
-                MEEM_global_status.init_stage = MEEM_INIT_CACHE;
-            }
-            else
-            {
-                MEEM_global_status.init_stage = MEEM_INIT_RECOVER_DATA;
+                    /* Can't read the EEPROM, or the instance is invalid: continue with default values */
+                    MEEM_global_status.init_stage = MEEM_INIT_RECOVER_DATA;
+                    break;
             }
             break;
 

@@ -1,0 +1,1550 @@
+{
+    "name": "MEEM_test_conversions_legacy",
+    "description": "Legacy model of the conversion tests, whose blocks all have other parameter lists than the current ones",
+    "children": [
+        {
+            "name": "From_uint8",
+            "description": "Ten parameters of type uint8",
+            "children": [
+                {
+                    "name": "to_uint8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "From_int8",
+            "description": "Ten parameters of type int8",
+            "children": [
+                {
+                    "name": "to_uint8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "From_uint16",
+            "description": "Ten parameters of type uint16",
+            "children": [
+                {
+                    "name": "to_uint8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "From_int16",
+            "description": "Ten parameters of type int16",
+            "children": [
+                {
+                    "name": "to_uint8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 3,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 3,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 3,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 3,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 3,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 3,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 3,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 3,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 3,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 3,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "From_uint32",
+            "description": "Ten parameters of type uint32",
+            "children": [
+                {
+                    "name": "to_uint8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "From_int32",
+            "description": "Ten parameters of type int32",
+            "children": [
+                {
+                    "name": "to_uint8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 5,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 5,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 5,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 5,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 5,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 5,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 5,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 5,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 5,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 5,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "From_uint64",
+            "description": "Ten parameters of type uint64",
+            "children": [
+                {
+                    "name": "to_uint8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 6,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 6,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 6,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 6,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 6,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 6,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 6,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 6,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 6,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 6,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "From_int64",
+            "description": "Ten parameters of type int64",
+            "children": [
+                {
+                    "name": "to_uint8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 7,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 7,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 7,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 7,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 7,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 7,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 7,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 7,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 7,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 7,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "From_float32",
+            "description": "Ten parameters of type float32",
+            "children": [
+                {
+                    "name": "to_uint8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 8,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_int8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 8,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_uint16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 8,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_int16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 8,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_uint32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 8,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_int32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 8,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_uint64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 8,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_int64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 8,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_float32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 8,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_float64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 8,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "From_float64",
+            "description": "Ten parameters of type float64",
+            "children": [
+                {
+                    "name": "to_uint8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 9,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_int8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 9,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_uint16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 9,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_int16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 9,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_uint32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 9,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_int32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 9,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_uint64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 9,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_int64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 9,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_float32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 9,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_float64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 9,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Bitfields",
+            "description": null,
+            "children": [
+                {
+                    "name": "narrowed",
+                    "description": null,
+                    "children": [
+                        {
+                            "name": "a",
+                            "description": null,
+                            "size_in_bits": 3
+                        },
+                        {
+                            "name": "b",
+                            "description": null,
+                            "size_in_bits": 3
+                        }
+                    ],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "signed_narrowed",
+                    "description": null,
+                    "children": [
+                        {
+                            "name": "s",
+                            "description": null,
+                            "size_in_bits": 4
+                        }
+                    ],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_signed",
+                    "description": null,
+                    "children": [
+                        {
+                            "name": "u",
+                            "description": null,
+                            "size_in_bits": 4
+                        }
+                    ],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_unsigned",
+                    "description": null,
+                    "children": [
+                        {
+                            "name": "n",
+                            "description": null,
+                            "size_in_bits": 4
+                        }
+                    ],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "renamed",
+                    "description": null,
+                    "children": [
+                        {
+                            "name": "kept",
+                            "description": null,
+                            "size_in_bits": 4
+                        },
+                        {
+                            "name": "dropped",
+                            "description": null,
+                            "size_in_bits": 4
+                        }
+                    ],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "wider_container",
+                    "description": null,
+                    "children": [
+                        {
+                            "name": "x",
+                            "description": null,
+                            "size_in_bits": 4
+                        },
+                        {
+                            "name": "y",
+                            "description": null,
+                            "size_in_bits": 4
+                        }
+                    ],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "gains",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "loses",
+                    "description": null,
+                    "children": [
+                        {
+                            "name": "lo",
+                            "description": null,
+                            "size_in_bits": 8
+                        },
+                        {
+                            "name": "hi",
+                            "description": null,
+                            "size_in_bits": 8
+                        }
+                    ],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "array",
+                    "description": null,
+                    "children": [
+                        {
+                            "name": "a",
+                            "description": null,
+                            "size_in_bits": 3
+                        },
+                        {
+                            "name": "b",
+                            "description": null,
+                            "size_in_bits": 3
+                        }
+                    ],
+                    "data_type": 0,
+                    "multiplicity": 3,
+                    "default_value": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                {
+                    "name": "wide",
+                    "description": null,
+                    "children": [
+                        {
+                            "name": "big",
+                            "description": null,
+                            "size_in_bits": 48
+                        },
+                        {
+                            "name": "small",
+                            "description": null,
+                            "size_in_bits": 3
+                        }
+                    ],
+                    "data_type": 6,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "signed_wide",
+                    "description": null,
+                    "children": [
+                        {
+                            "name": "v",
+                            "description": null,
+                            "size_in_bits": 48
+                        }
+                    ],
+                    "data_type": 7,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Multiplicity",
+            "description": null,
+            "children": [
+                {
+                    "name": "grow",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 2,
+                    "default_value": [
+                        0,
+                        0
+                    ]
+                },
+                {
+                    "name": "shrink",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 4,
+                    "default_value": [
+                        0,
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                {
+                    "name": "grow_converted",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 2,
+                    "default_value": [
+                        0,
+                        0
+                    ]
+                },
+                {
+                    "name": "shrink_converted",
+                    "description": null,
+                    "children": [],
+                    "data_type": 5,
+                    "multiplicity": 3,
+                    "default_value": [
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                {
+                    "name": "to_array",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_scalar",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 3,
+                    "default_value": [
+                        0,
+                        0,
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Runs",
+            "description": null,
+            "children": [
+                {
+                    "name": "a",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "b",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "c",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 4,
+                    "default_value": [
+                        0,
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                {
+                    "name": "d",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "e",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "f",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "g",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Profiles",
+            "description": null,
+            "children": [
+                {
+                    "name": "v",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                }
+            ],
+            "management_type": 2,
+            "instance_count": 2,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "FromWearLeveling",
+            "description": null,
+            "children": [
+                {
+                    "name": "v",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "x",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                }
+            ],
+            "management_type": 3,
+            "instance_count": 3,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "ToWearLeveling",
+            "description": null,
+            "children": [
+                {
+                    "name": "v",
+                    "description": null,
+                    "children": [],
+                    "data_type": 3,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        }
+    ]
+}

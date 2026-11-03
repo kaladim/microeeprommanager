@@ -1,0 +1,27 @@
+{
+    "description": [
+        "EEPROM images made by the image generator, which the inspector's tests read, so that they need no Python.",
+        "Each image is the Intel HEX file of its data model and platform settings, with the default base address and fill (0x0, 0xFF).",
+        "Where 'endianness' is given, it replaces that of the platform settings.",
+        "tools/eeprom_image_gen/test_eeprom_image_gen.py fails if an image is stale. Regenerate them with: uv run ./tools/eeprom_image_gen/make_image_vectors.py"
+    ],
+    "images": [
+        {
+            "image": "test/vectors/images/production_like_little.hex",
+            "datamodel": "test/footprint/production_like/eeprom_datamodel.json",
+            "settings": "test/footprint/production_like/platform_settings_xc8.json",
+            "endianness": "little"
+        },
+        {
+            "image": "test/vectors/images/production_like_big.hex",
+            "datamodel": "test/footprint/production_like/eeprom_datamodel.json",
+            "settings": "test/footprint/production_like/platform_settings_xc8.json",
+            "endianness": "big"
+        },
+        {
+            "image": "test/vectors/images/meem_config_page_aligned.hex",
+            "datamodel": "test/meem_config/eeprom_datamodel.json",
+            "settings": "test/meem_config/platform_settings_gcc.json"
+        }
+    ]
+}

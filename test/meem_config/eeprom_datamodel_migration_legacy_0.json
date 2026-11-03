@@ -1,0 +1,200 @@
+{
+    "name": "MEEM_test_migration_legacy_0",
+    "description": "Legacy model of the migration tests, laid out with the current platform settings",
+    "children": [
+        {
+            "name": "Block_Unchanged",
+            "description": null,
+            "children": [
+                {
+                    "name": "param",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 4,
+                    "default_value": [
+                        17,
+                        18,
+                        19,
+                        20
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block_Removed",
+            "description": "Not in the current model: never read, however large",
+            "children": [
+                {
+                    "name": "param",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 20,
+                    "default_value": [
+                        129,
+                        130,
+                        131,
+                        132,
+                        133,
+                        134,
+                        135,
+                        136,
+                        137,
+                        138,
+                        139,
+                        140,
+                        141,
+                        142,
+                        143,
+                        144,
+                        145,
+                        146,
+                        147,
+                        148
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block_Moved",
+            "description": null,
+            "children": [
+                {
+                    "name": "param",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 6,
+                    "default_value": [
+                        33,
+                        34,
+                        35,
+                        36,
+                        37,
+                        38
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block_Basic",
+            "description": null,
+            "children": [
+                {
+                    "name": "param",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 5,
+                    "default_value": [
+                        49,
+                        50,
+                        51,
+                        52,
+                        53
+                    ]
+                }
+            ],
+            "management_type": 1,
+            "instance_count": 2,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block_MultiProfile",
+            "description": null,
+            "children": [
+                {
+                    "name": "param",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 7,
+                    "default_value": [
+                        65,
+                        66,
+                        67,
+                        68,
+                        69,
+                        70,
+                        71
+                    ]
+                }
+            ],
+            "management_type": 2,
+            "instance_count": 2,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block_WearLeveling",
+            "description": null,
+            "children": [
+                {
+                    "name": "param",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 8,
+                    "default_value": [
+                        81,
+                        82,
+                        83,
+                        84,
+                        85,
+                        86,
+                        87,
+                        88
+                    ]
+                }
+            ],
+            "management_type": 3,
+            "instance_count": 5,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block_Changed",
+            "description": null,
+            "children": [
+                {
+                    "name": "a",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        97
+                    ]
+                },
+                {
+                    "name": "b",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        98
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        }
+    ]
+}

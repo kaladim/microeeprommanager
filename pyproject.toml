@@ -8,8 +8,6 @@ requires-python = ">=3.10"
 dependencies = [
     "bincopy",
     "colorama",
-    "crcmod",
-    "tzlocal",
 ]
 
 [dependency-groups]

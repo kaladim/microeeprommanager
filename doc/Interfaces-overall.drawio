@@ -52,7 +52,7 @@
         <mxCell id="Kx1a2HG8-Mk9bOMRa4Qg-12" value="" style="ellipse;whiteSpace=wrap;html=1;align=center;aspect=fixed;fillColor=none;strokeColor=none;resizable=0;perimeter=centerPerimeter;rotatable=0;allowArrows=0;points=[];outlineConnect=1;container=0;" vertex="1" parent="Kx1a2HG8-Mk9bOMRa4Qg-21">
           <mxGeometry x="160.17857142857136" y="265.1957295373666" width="10" height="10" as="geometry" />
         </mxCell>
-        <mxCell id="Kx1a2HG8-Mk9bOMRa4Qg-13" value="Checksum&lt;div&gt;routine&lt;/div&gt;" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;container=0;" vertex="1" parent="Kx1a2HG8-Mk9bOMRa4Qg-21">
+        <mxCell id="Kx1a2HG8-Mk9bOMRa4Qg-13" value="CRC unit driver&lt;div&gt;(optional)&lt;/div&gt;" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;container=0;" vertex="1" parent="Kx1a2HG8-Mk9bOMRa4Qg-21">
           <mxGeometry x="278.57142857142856" y="295.9430604982206" width="111.42857142857143" height="64.05693950177934" as="geometry" />
         </mxCell>
         <mxCell id="Kx1a2HG8-Mk9bOMRa4Qg-14" value="" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=halfCircle;endFill=0;endSize=6;strokeWidth=1;sketch=0;exitX=0.75;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="Kx1a2HG8-Mk9bOMRa4Qg-21" source="Kx1a2HG8-Mk9bOMRa4Qg-2">

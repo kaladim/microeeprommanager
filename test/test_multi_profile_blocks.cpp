@@ -3,7 +3,7 @@
 
 using ::testing::Return;
 
-class MultiProfileBlocksTest : public TestBase
+class MultiProfileBlocksTest : public CommittedEepromTest
 {
   public:
     MultiProfileBlocksTest()
@@ -21,7 +21,7 @@ class MultiProfileBlocksTest : public TestBase
 
     void SetUp() override
     {
-        TestBase::SetUp();
+        CommittedEepromTest::SetUp();
     }
 
     void TearDown() override
@@ -217,7 +217,7 @@ TEST_F(MultiProfileBlocksTest, WriteChangesOnlyTheInstanceOfTheActiveProfile)
 
             // Only the profile's instance is expected to change, to [checksum][data]
             const auto instance_offset = block_config->offset_in_eeprom + (profile_id * instance_size);
-            const auto checksum        = MEEM_CalculateChecksum(block_config->cache, block_config->data_size);
+            const auto checksum        = ReferenceCrc16(block_config->cache, block_config->data_size);
             std::memcpy(&expected_eeprom[instance_offset], &checksum, sizeof(checksum));
             std::copy(block_config->cache, &block_config->cache[block_config->data_size], expected_eeprom.begin() + instance_offset + sizeof(MEEM_checksum_t));
 

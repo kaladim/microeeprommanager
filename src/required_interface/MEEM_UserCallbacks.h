@@ -23,7 +23,8 @@
  * \note      Called in the context of #MEEM_Init().
  * \note      Called for multi-profile blocks only.
  * \note      Hint: since the blocks are initialized sequentially in the order they appear in the configuration array, the user can obtain the active index from
- * an other, already initialized block.
+ * an other, already initialized block. During a migration, the multi-profile blocks that were multi-profile blocks in the legacy data model too are
+ * initialized after every other block, in an order that the generator chose.
  * \param[in] block_id in the range [0..(MEEM_BLOCK_COUNT-1)]
  * \return    Active instance ID
  */
@@ -33,6 +34,8 @@ EXTERN_C uint8_t MEEM_SelectInitiallyActiveProfile(uint8_t block_id);
  * \brief     The mEEM core notifies the user about completed block initialization via this callback.
  * \note      Called in the context of #MEEM_Init().
  *            Then, if necessary, the user may call #MEEM_GetBlockStatus() to obtain additional info about the init process.
+ * \note      Called in the order in which the blocks are initialized: during a migration, the multi-profile blocks that were multi-profile blocks
+ *            in the legacy data model too come last (#MEEM_SelectInitiallyActiveProfile()).
  * \param[in] block_id in the range [0..(MEEM_BLOCK_COUNT-1)]
  */
 EXTERN_C void MEEM_OnBlockInitComplete(uint8_t block_id);

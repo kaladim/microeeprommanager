@@ -1,6 +1,6 @@
 #include "test_base.hpp"
 
-class TestBasicBlocks : public TestBase
+class TestBasicBlocks : public CommittedEepromTest
 {
 public:
     TestBasicBlocks()
@@ -18,10 +18,11 @@ public:
 
     void SetUp() override
     {
+        CommittedEepromTest::SetUp(); // Important: Call base class SetUp() first
     }
 
     void TearDown() override
     {
-        // Code here will be called immediately after each test (right before the destructor).
+        TestBase::TearDown(); // Important: Call base class TearDown()
     }
 };

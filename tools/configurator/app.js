@@ -1,22 +1,18 @@
 // Basic in-memory representation matching Python classes for validation and JSON mapping
-const DataTypes = {
-    uint8: 0, int8: 1, uint16: 2, int16: 3, uint32: 4, int32: 5, uint64: 6, int64: 7, float32: 8, float64: 9
-};
-const ManagementTypes = { Basic: 0, BackupCopy: 1, MultiProfile: 2, WearLeveling: 3 };
-const ManagementTypeLabels = {
-    [ManagementTypes.Basic]: 'Basic',
-    [ManagementTypes.BackupCopy]: 'Backup copy',
-    [ManagementTypes.MultiProfile]: 'Multi-profile',
-    [ManagementTypes.WearLeveling]: 'Wear-leveling'
-};
+const { DataTypes, DataTypeSizes, ManagementTypes, ManagementTypeLabels } = MeemCommon;
 const DataRecoveryStrategyLabels = { 0: 'Recover defaults & repair', 1: 'Recover defaults' };
-const DataTypeSizes = { 0: 1, 1: 1, 2: 2, 3: 2, 4: 4, 5: 4, 6: 8, 7: 8, 8: 4, 9: 8 };
 
 const FieldDocs = {
     datamodel: {
         name: "Has to be a valid C-language identifier.",
-        description: "Optional description.",
-        checksum_size: "Checksum size in bytes. Applies to all blocks."
+        description: "Optional description."
+    },
+    // Read-only, shown while both the data model and the platform settings are loaded
+    identity: {
+        eeprom_layout_identity: "32-bit hash of every block identity with its offset, and of the endianness. The firmware stores it in the identity header, and migrates from an older layout only if the generator got that layout's data model with --legacy.",
+        identity_header: "The 6 bytes at EEPROM offset 0, as the firmware writes them: the CRC-16 over the EEPROM layout identity, then the identity, both little-endian.",
+        block_identity: "16-bit hash of the block's name, management type, instance count and data identity. Blocks with the same block identity hold the same bytes in the same way.",
+        data_identity: "16-bit hash of the block's parameters and bitfields: their order, names, types, multiplicities and widths. Blocks with the same data identity hold the same parameters."
     },
     block: {
         name: "Has to be a valid C-language identifier.",
@@ -31,7 +27,7 @@ const FieldDocs = {
         description: "Optional description. If defined, will appear in the generated sources.",
         data_type: "Can be any standard integer or floating-point type. If the block contains BitFields, use unsigned integer.",
         multiplicity: "Values > 1 define the parameter as an array.",
-        default_value: "Number of elements must be equal to the 'multiplicity'."
+        default_value: "Number of elements must be equal to the 'multiplicity'. Floating-point types also accept NaN."
     },
     bitfield: {
         name: "Has to be a valid C-language identifier.",
@@ -46,6 +42,9 @@ const FieldDocs = {
         external_headers: "External header files, containing forward declarations for 'enter_critical_section_operation' and 'exit_critical_section_operation'.",
         enter_critical_section_operation: "Function/macro for designating the start of an atomic code fragment in the mEEM.",
         exit_critical_section_operation: "Function/macro for designating the end of an atomic code fragment in the mEEM.",
+        crc_implementation: "How the core calculates the instance checksum, CRC-16/IBM-3740. All of them give the same result. 'table': built-in routine with a 256-entry table (512 bytes of flash), the fastest built-in variant. 'bitwise': built-in routine without a table, the smallest; choose it when flash is tight. 'hardware': the MCU's CRC unit, through the user's driver MEEM_CRCIF.h.",
+        crc_table_placement_directive: "Compiler-specific placement directive for the CRC table. Will be placed just before the table's definition. Applies only to crc_implementation 'table'. You either use a placement directive or an attribute, but not both at the same time.",
+        crc_table_placement_attribute: "Compiler-specific placement attribute for the CRC table, like AVR's '__flash'. Will be added to the table's definition and declaration, so that the core reads the table through the right address space. Applies only to crc_implementation 'table'. You either use a placement directive or an attribute, but not both at the same time.",
         opening_pack_directive: "All caches and defaults are defined as packed structures with byte alignment. If provided, this directive will be placed at the start of block type definitions. Some compilers may not require this at all, like those for 8-bit CPUs. You can use either a pack directive or an attribute, but never both at the same time.",
         closing_pack_directive: "Counterpart of the opening pack directive, where applicable.",
         pack_attribute: "Has the same effect as 'opening_pack_directive', but will be inserted inline with the definitions of block data types.",
@@ -63,12 +62,13 @@ const FieldDocs = {
 let state = {
     dataModel: null, // DataModel object
     platformSettings: null, // PlatformSettings object
-    checksumSettings: null, // Checksum settings object
-    checksumTypeHints: {}, // Type hints for checksum parameters (to distinguish float from int)
-    savedNames: { dataModel: null, platform: null, checksum: null },
+    // True while the platform settings are the defaults that editing a block's placement created, rather than
+    // settings the user loaded, created or saved: the identities aren't shown for them, since they may not be the target's.
+    platformSettingsImplicit: false,
+    savedNames: { dataModel: null, platform: null },
     // FileSystemFileHandle for each config when loaded via the File System Access API.
     // Holding the handle lets us write straight back to the file's original on-disk location.
-    fileHandles: { dataModel: null, platform: null, checksum: null },
+    fileHandles: { dataModel: null, platform: null },
     // Optional directory handle the user has granted; lets the status bar show a
     // path relative to it. Browsers never expose absolute filesystem paths to a page.
     rootDirHandle: null,
@@ -90,6 +90,45 @@ function setStatus(msg) {
     text.className = 'status-msg';
     text.textContent = msg;
     el.append(time, text);
+    refreshIdentities(); // Every edit reports itself here
+}
+
+// ---- Identities, computed by common/js/identity.js ----------------------------------
+// Shown only while there are both a data model and platform settings that the user loaded, created or saved.
+
+function identitiesShown() {
+    return !!(state.dataModel && state.platformSettings && !state.platformSettingsImplicit);
+}
+
+// what: 'layout' or 'header' of the data model, 'block' or 'data' of the block with the index
+function identityText(what, blockIndex) {
+    try {
+        if (what === 'layout' || what === 'header') {
+            const identity = MeemCommon.eepromLayoutIdentity(state.dataModel, state.platformSettings);
+            return what === 'layout' ? MeemCommon.formatHex(identity, 8) : MeemCommon.formatBytes(MeemCommon.identityHeader(identity));
+        }
+        const block = state.dataModel.children[blockIndex];
+        return MeemCommon.formatHex(what === 'block' ? MeemCommon.blockIdentity(block) : MeemCommon.dataIdentity(block), 4);
+    } catch (err) {
+        return "can't be computed: " + err.message;
+    }
+}
+
+// Appends read-only rows to a properties panel: [field, what, blockIndex] each
+function appendIdentityRows(container, rows) {
+    if (!identitiesShown()) return;
+    for (const [field, what, blockIndex] of rows) {
+        const value = el('div', { className: 'identity-value', dataset: { identity: what, block: String(blockIndex ?? '') } });
+        value.textContent = identityText(what, blockIndex);
+        container.appendChild(createProp(formatLabel(field), value, FieldDocs.identity[field]));
+    }
+}
+
+// Recomputes the identities shown, so that they follow every edit, including those in the platform settings
+function refreshIdentities() {
+    for (const value of document.querySelectorAll('.identity-value')) {
+        value.textContent = identitiesShown() ? identityText(value.dataset.identity, Number(value.dataset.block)) : '';
+    }
 }
 
 // Utility: deep clone
@@ -133,12 +172,6 @@ function el(tag, props = {}) {
     return element;
 }
 
-function createButton(text, onClick, style = {}) {
-    const btn = el('button', { textContent: text, style });
-    if (onClick) btn.addEventListener('click', onClick);
-    return btn;
-}
-
 function createInput(type, value, onChange, props = {}) {
     const inp = el('input', { type, value, ...props });
     if (onChange) inp.addEventListener('change', onChange);
@@ -155,110 +188,6 @@ function createProp(labelText, inputElement, titleText = '') {
     prop.appendChild(label);
     prop.appendChild(inputElement);
     return prop;
-}
-
-// Utility: Create modal dialog
-function createModal(title, onClose) {
-    const overlay = el('div', {
-        style: {
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.7)', zIndex: 1000,
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
-        }
-    });
-
-    const dialog = el('div', {
-        style: {
-            background: '#2d2d30', padding: '24px', borderRadius: '8px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.8)', minWidth: '400px',
-            border: '1px solid rgba(255,255,255,0.1)'
-        }
-    });
-
-    const titleEl = el('h3', {
-        textContent: title,
-        style: { margin: '0 0 20px 0', color: '#5ca8d8' }
-    });
-    dialog.appendChild(titleEl);
-
-    overlay.appendChild(dialog);
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-            document.body.removeChild(overlay);
-            if (onClose) onClose();
-        }
-    });
-
-    return { overlay, dialog };
-}
-
-function createDialogInput(labelText, placeholder = '', type = 'text') {
-    const label = el('label', {
-        textContent: labelText,
-        style: { display: 'block', color: '#888', marginBottom: '6px' }
-    });
-
-    const input = el('input', {
-        type,
-        placeholder,
-        style: {
-            width: '100%', padding: '8px', borderRadius: '4px',
-            border: '1px solid rgba(255,255,255,0.1)',
-            background: 'rgba(255,255,255,0.05)', color: '#ddd',
-            marginBottom: '16px', boxSizing: 'border-box'
-        }
-    });
-
-    return { label, input };
-}
-
-function createDialogSelect(labelText, options) {
-    const label = el('label', {
-        textContent: labelText,
-        style: { display: 'block', color: '#888', marginBottom: '6px' }
-    });
-
-    const select = el('select', {
-        style: {
-            width: '100%', padding: '8px', borderRadius: '4px',
-            border: '1px solid rgba(255,255,255,0.1)',
-            background: 'rgba(255,255,255,0.05)', color: '#ddd',
-            marginBottom: '20px', boxSizing: 'border-box'
-        }
-    });
-
-    options.forEach(optText => {
-        const option = el('option', {
-            value: optText,
-            textContent: optText,
-            style: { background: '#2d2d30', color: '#ddd' }
-        });
-        select.appendChild(option);
-    });
-
-    return { label, select };
-}
-
-function createDialogButtons(onCancel, onConfirm, confirmText = 'OK') {
-    const container = el('div', {
-        style: { display: 'flex', gap: '8px', justifyContent: 'flex-end' }
-    });
-
-    const cancelBtn = createButton('Cancel', onCancel, {
-        padding: '8px 16px', borderRadius: '4px',
-        border: '1px solid rgba(255,255,255,0.1)',
-        background: 'rgba(255,255,255,0.05)', color: '#ddd', cursor: 'pointer'
-    });
-
-    const confirmBtn = createButton(confirmText, onConfirm, {
-        padding: '8px 16px', borderRadius: '4px',
-        border: '1px solid #007acc', background: 'rgba(0,122,204,0.2)',
-        color: '#fff', cursor: 'pointer', fontWeight: '500'
-    });
-
-    container.appendChild(cancelBtn);
-    container.appendChild(confirmBtn);
-    return container;
 }
 
 // Utility: Create a custom-select dropdown to avoid repetition
@@ -325,20 +254,17 @@ function blockNameExists(name, excludePath) {
 }
 
 // Default factories
-function makeEmptyDataModel() { return { name: '', description: '', checksum_size: 1, children: [] } }
+function makeEmptyDataModel() { return { name: '', description: '', children: [] } }
 function makeEmptyBlock() { return { name: '', description: '', children: [], management_type: ManagementTypes.Basic, instance_count: 1, data_recovery_strategy: 0, compress_defaults: true } }
 function makeEmptyParameter() { return { name: '', description: '', children: [], data_type: DataTypes.uint8, multiplicity: 1, default_value: [0] } }
 function makeEmptyBitfield() { return { name: '', description: '', size_in_bits: 1 } }
-function makeDefaultPlatform() { return { endianness: 'little', eeprom_size: 256, eeprom_page_size: 0, page_aligned_blocks: ['*'], external_headers: [], enter_critical_section_operation: null, exit_critical_section_operation: null, compiler_directives: { opening_pack_directive: null, closing_pack_directive: null, pack_attribute: null, block_placement_directives: {} }, code_gen_settings: { language_standard: 'c90', accessor_style: 'inline_functions', cache_layout: 'granular' } } }
-function makeDefaultChecksum() { return { algo: 'crc' } }
+function makeDefaultPlatform() { return { endianness: 'little', eeprom_size: 256, eeprom_page_size: 0, page_aligned_blocks: ['*'], external_headers: [], enter_critical_section_operation: null, exit_critical_section_operation: null, crc_implementation: 'table', compiler_directives: { opening_pack_directive: null, closing_pack_directive: null, pack_attribute: null, block_placement_directives: {}, crc_table_placement_directive: null, crc_table_placement_attribute: null }, code_gen_settings: { language_standard: 'c90', accessor_style: 'inline_functions', cache_layout: 'granular' } } }
 
 // File menu
 const openDataModelInput = document.getElementById('openDataModelInput')
 const openPlatformInput = document.getElementById('openPlatformInput')
-const openChecksumInput = document.getElementById('openChecksumInput')
 openDataModelInput.addEventListener('change', handleOpenDataModel)
 openPlatformInput.addEventListener('change', handleOpenPlatform)
-openChecksumInput.addEventListener('change', handleOpenChecksum)
 
 // --- File System Access API helpers ---------------------------------------
 // Chromium browsers (Chrome/Edge) expose showOpenFilePicker/showSaveFilePicker,
@@ -351,29 +277,29 @@ const JSON_PICKER_TYPES = [{ description: 'JSON file', accept: { 'application/js
 // Parse/validate handlers, decoupled from how the text was obtained (picker or <input>).
 function processDataModelText(text, name) {
     const raw = parseConfigJson(text);
+    // mEEM v2 has a fixed 2-byte CRC-16 for every data model, and its generator rejects a data model with 'checksum_size'.
+    // Dropped here, so that the next save writes a data model the generator accepts.
+    const hadChecksumSize = (raw && typeof raw === 'object' && 'checksum_size' in raw);
+    if (hadChecksumSize) delete raw.checksum_size;
     state.dataModel = raw;
     restoreNumericTypesAfterLoad(state.dataModel);
     validateDataModelLoad();
     collapseAllBlocks();
     renderTree();
-    setStatus('Loaded data model file: ' + name);
+    setStatus('Loaded data model file: ' + name + (hadChecksumSize
+        ? ". Its 'checksum_size' was removed: mEEM v2 checks every data model with a 2-byte CRC-16, and its generator rejects the attribute. Save to write the data model without it."
+        : ''));
 }
 
 function processPlatformText(text, name) {
     const raw = parseConfigJson(text);
     state.platformSettings = raw;
+    state.platformSettingsImplicit = false;
     restoreNumericTypesAfterLoad(state.platformSettings);
     validatePlatformLoad();
     setStatus('Loaded platform settings file: ' + name);
     renderPlatformSettings();
-}
-
-function processChecksumText(text, name) {
-    const raw = parseConfigJson(text);
-    state.checksumSettings = raw;
-    restoreNumericTypesAfterLoad(state.checksumSettings);
-    setStatus('Loaded checksum settings file: ' + name);
-    renderChecksum();
+    if (selectedPath) renderProps(); // The identities need the platform settings
 }
 
 // Generic load: prefer the File System Access picker (so we capture a writable
@@ -425,7 +351,6 @@ function handleOpenViaInput(e, key, label, process) {
 
 function handleOpenDataModel(e) { handleOpenViaInput(e, 'dataModel', 'data model', processDataModelText); }
 function handleOpenPlatform(e) { handleOpenViaInput(e, 'platform', 'platform settings', processPlatformText); }
-function handleOpenChecksum(e) { handleOpenViaInput(e, 'checksum', 'checksum settings', processChecksumText); }
 
 function validateDataModelLoad() {
     try {
@@ -435,7 +360,6 @@ function validateDataModelLoad() {
         for (const b of state.dataModel.children) { if (!('children' in b)) b.children = []; for (const p of b.children) { if (!('children' in p)) p.children = []; if (!('default_value' in p)) p.default_value = [0]; } }
         // Use JS validation mirroring Python validate() but simpler - major checks
         const errs = [];
-        if ([1, 2, 4].indexOf(state.dataModel.checksum_size) === -1) errs.push('checksum_size must be 1,2 or 4');
         if (state.dataModel.children.length === 0) errs.push('datamodel must contain at least one block');
         if (errs.length) throw new Error(errs.join('\n'))
     } catch (err) { throw err }
@@ -549,7 +473,7 @@ function pushValidationError(errors, message, path) {
 
 // Helper to validate block structure
 function validateBlock(block, blockPath, errors) {
-    if (!is_valid_identifier((block.name || '').trim())) {
+    if (!is_valid_identifier(block.name || '')) {
         pushValidationError(errors, `Block '${block.name}' has invalid name!`, blockPath);
     }
     if (!is_instance_count_valid(block)) {
@@ -566,7 +490,7 @@ function validateBlock(block, blockPath, errors) {
 
 // Helper to validate parameter structure
 function validateParameter(param, block, paramPath, errors) {
-    if (!is_valid_identifier((param.name || '').trim())) {
+    if (!is_valid_identifier(param.name || '')) {
         pushValidationError(errors, `Parameter '${param.name}' in block '${block.name}' has invalid name!`, paramPath);
     }
     const dupBF = get_duplicate_names(param.children || []);
@@ -586,7 +510,7 @@ function validateParameter(param, block, paramPath, errors) {
 
 // Helper to validate bitfield structure
 function validateBitfield(bf, param, block, bfPath, errors) {
-    if (!is_valid_identifier((bf.name || '').trim())) {
+    if (!is_valid_identifier(bf.name || '')) {
         pushValidationError(errors, `Bitfield '${bf.name}' in parameter '${param.name}' in block '${block.name}' has invalid name!`, bfPath);
     }
     if (bf.size_in_bits < 1 || bf.size_in_bits > ((DataTypeSizes[param.data_type] || 1) * 8)) {
@@ -604,10 +528,17 @@ function validateAll() {
         if (ps.enter_critical_section_operation && !is_valid_identifier(ps.enter_critical_section_operation)) push(errors, "'enter_critical_section_operation' is not a valid C-language identifier");
         if (ps.exit_critical_section_operation && !is_valid_identifier(ps.exit_critical_section_operation)) push(errors, "'exit_critical_section_operation' is not a valid C-language identifier");
         if (ps.compiler_directives && ps.compiler_directives.pack_attribute && (ps.compiler_directives.opening_pack_directive || ps.compiler_directives.closing_pack_directive)) push(errors, 'You cannot have both compiler pack directive and attr defined at the same time');
+
+        // As common/py/platform_settings.py validates them
+        const crcImplementation = ps.crc_implementation ?? 'table';
+        const crcTableDirective = ps.compiler_directives && ps.compiler_directives.crc_table_placement_directive;
+        const crcTableAttribute = ps.compiler_directives && ps.compiler_directives.crc_table_placement_attribute;
+        if (!['table', 'bitwise', 'hardware'].includes(crcImplementation)) push(errors, "'crc_implementation' must be 'table', 'bitwise' or 'hardware'");
+        if (crcTableDirective && crcTableAttribute) push(errors, 'You cannot have both placement directive and attribute for the CRC table defined at the same time');
+        if ((crcTableDirective || crcTableAttribute) && crcImplementation !== 'table') push(errors, "The placement directive and attribute for the CRC table apply only to 'crc_implementation' 'table'");
     }
 
     if (!dm) { push(errors, 'No datamodel defined'); return errors; }
-    if ([1, 2, 4].indexOf(dm.checksum_size) === -1) push(errors, 'The checksum size can be: 1,2 or 4 bytes');
     if (!dm.children || dm.children.length === 0) push(errors, 'The datamodel must contain at least one block!');
 
     const all_blocks = dm.children || [];
@@ -684,14 +615,6 @@ document.getElementById('savePlatformBtn').addEventListener('click', () => {
     savePlatformSettings();
 });
 
-document.getElementById('loadChecksumBtn').addEventListener('click', () => {
-    loadConfig('checksum', 'checksum settings', processChecksumText, openChecksumInput);
-});
-
-document.getElementById('saveChecksumBtn').addEventListener('click', () => {
-    saveChecksumParameters();
-});
-
 // --- Drag & drop loading ---------------------------------------------------
 // Each tab's area is a drop zone for its own config type. Dropping a .json onto
 // the visible tab loads it. In Chromium we grab a FileSystemFileHandle from the
@@ -754,7 +677,6 @@ function setupDropZone(el, key, label, process) {
 
 setupDropZone(document.getElementById('dataArea'), 'dataModel', 'data model', processDataModelText);
 setupDropZone(document.getElementById('platformArea'), 'platform', 'platform settings', processPlatformText);
-setupDropZone(document.getElementById('checksumArea'), 'checksum', 'checksum settings', processChecksumText);
 
 // Stop the browser from navigating away if a file is dropped outside a zone.
 window.addEventListener('dragover', (e) => { if (e.dataTransfer && Array.from(e.dataTransfer.items || []).some(i => i.kind === 'file')) e.preventDefault(); });
@@ -823,7 +745,6 @@ function setupSplitButton(menuBtnId, saveFunc, saveAsFunc) {
 
 setupSplitButton('saveDataModelBtnMenu', saveDataModel, saveDataModelAs);
 setupSplitButton('savePlatformBtnMenu', savePlatformSettings, savePlatformSettingsAs);
-setupSplitButton('saveChecksumBtnMenu', saveChecksumParameters, saveChecksumParametersAs);
 
 // Close split button menus on window click
 window.addEventListener('click', () => {
@@ -842,7 +763,6 @@ function bigintReplacer(key, value) {
 // JSON numbers so e.g. parameter default_value arrays round-trip as integers,
 // not strings. NaN floats are serialized as the string "NaN".
 function serializeDataModel() { return stringifyConfig(state.dataModel, 4); }
-function serializeChecksum() { return stringifyConfig(state.checksumSettings, 4); }
 
 function serializePlatform() {
     // Normalize page_aligned_blocks before saving
@@ -882,8 +802,15 @@ function serializePlatform() {
 const CONFIG_DEFS = {
     dataModel: { getData: () => state.dataModel, serialize: serializeDataModel, defaultName: 'data_model.json', label: 'data model' },
     platform: { getData: () => state.platformSettings, serialize: serializePlatform, defaultName: 'platform_settings.json', label: 'platform settings' },
-    checksum: { getData: () => state.checksumSettings, serialize: serializeChecksum, defaultName: 'checksum_parameters.json', label: 'checksum parameters' },
 };
+
+// Saved platform settings are the user's, and the identities are shown for them
+function onSaved(key) {
+    if (key === 'platform' && state.platformSettingsImplicit) {
+        state.platformSettingsImplicit = false;
+        if (selectedPath) renderProps();
+    }
+}
 
 // Write text straight into a FileSystemFileHandle's original on-disk location,
 // requesting readwrite permission first (the browser may prompt once per file).
@@ -918,6 +845,7 @@ async function saveConfig(key, { saveAs = false } = {}) {
         try {
             await writeToHandle(handle, text);
             setStatus('Saved ' + def.label + ' → ' + await handlePath(handle));
+            onSaved(key);
             return;
         } catch (err) {
             // File moved, permission revoked, etc. -> fall through to ask for a destination.
@@ -935,6 +863,7 @@ async function saveConfig(key, { saveAs = false } = {}) {
             state.fileHandles[key] = newHandle;
             state.savedNames[key] = newHandle.name;
             setStatus('Saved ' + def.label + ' → ' + await handlePath(newHandle));
+            onSaved(key);
             return;
         } catch (err) {
             if (err && err.name === 'AbortError') return; // user cancelled the dialog
@@ -950,6 +879,7 @@ async function saveConfig(key, { saveAs = false } = {}) {
     }
     downloadBlob(new Blob([text], { type: 'application/json' }), state.savedNames[key]);
     setStatus('Saved ' + def.label + ' → ' + state.savedNames[key] + ' (browser Downloads folder)');
+    onSaved(key);
 }
 
 // Best path string a browser will surface for a saved file. Browsers sandbox the
@@ -968,10 +898,8 @@ async function handlePath(handle) {
 
 function saveDataModel() { return saveConfig('dataModel'); }
 function savePlatformSettings() { return saveConfig('platform'); }
-function saveChecksumParameters() { return saveConfig('checksum'); }
 function saveDataModelAs() { return saveConfig('dataModel', { saveAs: true }); }
 function savePlatformSettingsAs() { return saveConfig('platform', { saveAs: true }); }
-function saveChecksumParametersAs() { return saveConfig('checksum', { saveAs: true }); }
 
 function downloadBlob(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); }
 
@@ -1637,15 +1565,7 @@ function renderProps() {
         const descProp = createProp(formatLabel('description'), descInp, FieldDocs.datamodel.description || '');
         container.appendChild(descProp);
 
-        // checksum_size (custom dropdown to avoid native white popup)
-        const csOptions = { '1': '1', '2': '2', '4': '4' };
-        const csWrap = createCustomSelect(csOptions, String(node.checksum_size || 1), (newVal) => {
-            node.checksum_size = Number(newVal);
-            setStatus('datamodel checksum_size changed');
-        });
-        const csProp = createProp(formatLabel('checksum_size'), csWrap, FieldDocs.datamodel.checksum_size || '');
-        container.appendChild(csProp);
-
+        appendIdentityRows(container, [['eeprom_layout_identity', 'layout'], ['identity_header', 'header']]);
         return;
     }
     // For each property except children - show inputs
@@ -2055,10 +1975,17 @@ function renderProps() {
         container.appendChild(prop)
     }
 
+    if (type === 'block') {
+        appendIdentityRows(container, [['block_identity', 'block', selectedPath[0]], ['data_identity', 'data', selectedPath[0]]]);
+    }
+
     // Per-block platform settings: page_aligned and placement directives
     if (type === 'block') {
         // ensure platform settings exist
-        if (!state.platformSettings) state.platformSettings = makeDefaultPlatform();
+        if (!state.platformSettings) {
+            state.platformSettings = makeDefaultPlatform();
+            state.platformSettingsImplicit = true;
+        }
         const bsName = node.name || '';
         const paDiv = document.createElement('div'); paDiv.className = 'prop'; const paLabel = document.createElement('label'); paLabel.textContent = formatLabel('page_aligned'); paDiv.appendChild(paLabel);
         const paCb = document.createElement('input'); paCb.type = 'checkbox';
@@ -2185,14 +2112,14 @@ function renderPlatformSettings() {
 
     // ---- General (PlatformSettings) ----
     const general = createSettingsSection('General');
-    for (const key of ['endianness', 'eeprom_size', 'eeprom_page_size', 'page_aligned_blocks', 'external_headers', 'enter_critical_section_operation', 'exit_critical_section_operation']) {
+    for (const key of ['endianness', 'eeprom_size', 'eeprom_page_size', 'page_aligned_blocks', 'external_headers', 'enter_critical_section_operation', 'exit_critical_section_operation', 'crc_implementation']) {
         addPlatformField(general.grid, ps, key);
     }
     grid.appendChild(general.section);
 
     // ---- Compiler directives (CompilerDirectives) ----
     const compiler = createSettingsSection('Compiler directives');
-    for (const key of ['opening_pack_directive', 'closing_pack_directive', 'pack_attribute']) {
+    for (const key of ['opening_pack_directive', 'closing_pack_directive', 'pack_attribute', 'crc_table_placement_directive', 'crc_table_placement_attribute']) {
         addPlatformField(compiler.grid, ps.compiler_directives, key);
     }
     const note = document.createElement('div');
@@ -2239,6 +2166,7 @@ function addPlatformField(grid, obj, key) {
 
     const selectFields = {
         endianness: { little: 'little', big: 'big' },
+        crc_implementation: { table: 'table', bitwise: 'bitwise', hardware: 'hardware' },
         language_standard: { c90: 'c90', c99: 'c99' },
         accessor_style: { inline_functions: 'inline functions', macros: 'macros' },
         cache_layout: { granular: 'granular', monolith: 'monolith' },
@@ -2299,152 +2227,6 @@ function addPlatformField(grid, obj, key) {
     const d2 = document.createElement('div'); d2.appendChild(valWrap); grid.appendChild(d2);
 }
 
-// checksum rendering
-function renderChecksum() {
-    const grid = document.getElementById('checksumGrid');
-    const hint = document.getElementById('checksumHint');
-
-    grid.innerHTML = '';
-
-    if (!state.checksumSettings) {
-        hint.style.display = 'block';
-        grid.style.display = 'none';
-        return;
-    }
-
-    hint.style.display = 'none';
-    grid.style.display = 'grid';
-
-    const cs = state.checksumSettings;
-
-    // algo field is always required and rendered first
-    const algoLabel = document.createElement('div'); algoLabel.textContent = 'algo';
-    const algoVal = document.createElement('div');
-    const algoInp = document.createElement('input');
-    algoInp.type = 'text';
-    algoInp.value = cs.algo || 'crc';
-    algoInp.addEventListener('change', () => {
-        cs.algo = algoInp.value;
-        setStatus('algo changed');
-    });
-    algoVal.appendChild(algoInp);
-    grid.appendChild(algoLabel); grid.appendChild(algoVal);
-
-    // Render all other fields dynamically
-    for (const key in cs) {
-        if (key === 'algo') continue; // already handled
-
-        const label = document.createElement('div');
-        label.textContent = key.replace(/_/g, ' ');
-        label.dataset.paramKey = key; // Store the actual key for deletion
-        label.style.cursor = 'context-menu';
-        label.title = 'Right-click to delete';
-
-        const valueDiv = document.createElement('div');
-        const value = cs[key];
-
-        // Handle different value types
-        if (typeof value === 'boolean') {
-            // Boolean field - use checkbox
-            const cb = document.createElement('input');
-            cb.type = 'checkbox';
-            cb.checked = value;
-            cb.addEventListener('change', () => {
-                cs[key] = cb.checked;
-                setStatus(`${key} changed`);
-            });
-            valueDiv.appendChild(cb);
-        } else if (typeof value === 'number') {
-            // Number field - check type hint first, then if it's an integer or float
-            const inp = document.createElement('input');
-            inp.type = 'text';
-
-            // Check if we have a type hint for this parameter
-            const typeHint = state.checksumTypeHints[key];
-            const isFloat = typeHint === 'float' || (!Number.isInteger(value) && typeHint !== 'number');
-
-            if (isFloat) {
-                // Float - show as decimal
-                inp.value = value.toString();
-                inp.addEventListener('change', () => {
-                    const parsed = parseFloat(inp.value);
-                    if (isNaN(parsed)) {
-                        alert('Invalid floating-point value');
-                        inp.value = cs[key].toString();
-                    } else {
-                        cs[key] = parsed;
-                        setStatus(`${key} changed`);
-                    }
-                });
-            } else {
-                // Integer - show as hex
-                inp.value = '0x' + value.toString(16).toUpperCase();
-                inp.addEventListener('change', () => {
-                    try {
-                        const parsed = parseInt(inp.value, inp.value.startsWith('0x') ? 16 : 10);
-                        cs[key] = parsed;
-                        inp.value = '0x' + cs[key].toString(16).toUpperCase();
-                        setStatus(`${key} changed`);
-                    } catch (e) {
-                        alert('Invalid number value');
-                        inp.value = '0x' + cs[key].toString(16).toUpperCase();
-                    }
-                });
-            }
-            valueDiv.appendChild(inp);
-        } else {
-            // String or other type - use text input
-            const inp = document.createElement('input');
-            inp.type = 'text';
-            inp.value = String(value);
-            inp.addEventListener('change', () => {
-                cs[key] = inp.value;
-                setStatus(`${key} changed`);
-            });
-            valueDiv.appendChild(inp);
-        }
-
-        grid.appendChild(label);
-        grid.appendChild(valueDiv);
-    }
-}
-
-// Context menu for checksum parameters
-const checksumGrid = document.getElementById('checksumGrid');
-checksumGrid.addEventListener('contextmenu', (e) => {
-    e.preventDefault();
-    const contextMenu = document.getElementById('contextMenu');
-    contextMenu.innerHTML = '';
-    contextMenu.style.left = e.clientX + 'px';
-    contextMenu.style.top = e.clientY + 'px';
-    contextMenu.style.display = 'block';
-
-    // Check if clicked on a parameter label
-    const label = e.target.closest('[data-param-key]');
-    const paramKey = label ? label.dataset.paramKey : null;
-
-    // Add new parameter option (always available)
-    const addBtn = createContextButton('➕ Add new parameter', () => {
-        contextMenu.style.display = 'none';
-        showAddParameterDialog();
-    });
-    contextMenu.appendChild(addBtn);
-
-    // Delete parameter option (only if a parameter label was clicked)
-    if (paramKey) {
-        const delBtn = createContextButton('🗑️ Delete parameter', () => {
-            contextMenu.style.display = 'none';
-            if (confirm(`Delete parameter "${paramKey}"?`)) {
-                delete state.checksumSettings[paramKey];
-                delete state.checksumTypeHints[paramKey]; // Also remove type hint
-                renderChecksum();
-                setStatus(`Deleted parameter: ${paramKey}`);
-            }
-        });
-        contextMenu.appendChild(delBtn);
-    }
-});
-
 // Platform settings hint context menu
 const platformHint = document.getElementById('platformHint');
 platformHint.addEventListener('contextmenu', (e) => {
@@ -2458,112 +2240,13 @@ platformHint.addEventListener('contextmenu', (e) => {
     const createBtn = createContextButton('📦 Create new', () => {
         contextMenu.style.display = 'none';
         state.platformSettings = makeDefaultPlatform();
+        state.platformSettingsImplicit = false;
         renderPlatformSettings();
+        if (selectedPath) renderProps(); // The identities need the platform settings
         setStatus('Created new platform settings');
     });
     contextMenu.appendChild(createBtn);
 });
-
-// Checksum parameters hint context menu
-const checksumHint = document.getElementById('checksumHint');
-checksumHint.addEventListener('contextmenu', (e) => {
-    e.preventDefault();
-    const contextMenu = document.getElementById('contextMenu');
-    contextMenu.innerHTML = '';
-    contextMenu.style.left = e.clientX + 'px';
-    contextMenu.style.top = e.clientY + 'px';
-    contextMenu.style.display = 'block';
-
-    const createBtn = createContextButton('📦 Create new', () => {
-        contextMenu.style.display = 'none';
-        state.checksumSettings = makeDefaultChecksum();
-        renderChecksum();
-        setStatus('Created new checksum parameters');
-    });
-    contextMenu.appendChild(createBtn);
-});
-
-function showAddParameterDialog() {
-    const { overlay, dialog } = createModal('Add New Parameter');
-
-    // Name input
-    const { label: nameLabel, input: nameInput } = createDialogInput('Parameter name:', 'e.g., polynomial');
-    dialog.appendChild(nameLabel);
-    dialog.appendChild(nameInput);
-
-    // Type dropdown
-    const { label: typeLabel, select: typeSelect } = createDialogSelect('Parameter type:', ['string', 'number', 'float', 'boolean']);
-    dialog.appendChild(typeLabel);
-    dialog.appendChild(typeSelect);
-
-    // Handle add action
-    const handleAdd = () => {
-        const name = nameInput.value.trim();
-        if (!name) {
-            alert('Please enter a parameter name');
-            return;
-        }
-
-        // Validate C identifier
-        const cIdentifierPattern = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
-        if (!cIdentifierPattern.test(name)) {
-            alert('Parameter name must be a valid C identifier:\n- Start with a letter or underscore\n- Contain only letters, digits, and underscores');
-            return;
-        }
-
-        // Check if parameter already exists
-        if (name in state.checksumSettings) {
-            alert(`Parameter "${name}" already exists!`);
-            return;
-        }
-
-        const type = typeSelect.value;
-        let defaultValue;
-        switch (type) {
-            case 'string':
-                defaultValue = '';
-                break;
-            case 'number':
-                defaultValue = 0;
-                break;
-            case 'float':
-                defaultValue = 0.0;
-                break;
-            case 'boolean':
-                defaultValue = false;
-                break;
-        }
-
-        // Add the new parameter
-        state.checksumSettings[name] = defaultValue;
-        // Store type hint to distinguish float from integer
-        if (type === 'float' || type === 'number') {
-            state.checksumTypeHints[name] = type;
-        }
-        renderChecksum();
-        setStatus(`Added parameter: ${name}`);
-        document.body.removeChild(overlay);
-    };
-
-    // Buttons
-    const buttons = createDialogButtons(
-        () => document.body.removeChild(overlay),
-        handleAdd,
-        'Add'
-    );
-    dialog.appendChild(buttons);
-
-    document.body.appendChild(overlay);
-
-    // Focus name input and handle keyboard
-    nameInput.focus();
-    const handleKey = (e) => {
-        if (e.key === 'Enter') handleAdd();
-        if (e.key === 'Escape') document.body.removeChild(overlay);
-    };
-    nameInput.addEventListener('keydown', handleKey);
-    typeSelect.addEventListener('keydown', handleKey);
-}
 
 // resizing
 const resizer = document.getElementById('resizer'); let isResizing = false; resizer.addEventListener('mousedown', (e) => { isResizing = true; document.body.style.cursor = 'col-resize' }); window.addEventListener('mousemove', (e) => { if (!isResizing) return; const left = document.getElementById('leftPanel'); const rect = document.getElementById('dataArea').getBoundingClientRect(); let newW = e.clientX - rect.left - 8; if (newW < 200) newW = 200; if (newW > 600) newW = 600; left.style.width = newW + 'px'; }); window.addEventListener('mouseup', () => { isResizing = false; document.body.style.cursor = 'default' });
@@ -2572,34 +2255,20 @@ const resizer = document.getElementById('resizer'); let isResizing = false; resi
 document.getElementById('tabData').addEventListener('click', () => {
     document.getElementById('dataArea').style.display = 'flex';
     document.getElementById('platformArea').style.display = 'none';
-    document.getElementById('checksumArea').style.display = 'none';
     document.getElementById('tabData').classList.add('active');
     document.getElementById('tabPlatform').classList.remove('active');
-    document.getElementById('tabChecksum').classList.remove('active');
 })
 document.getElementById('tabPlatform').addEventListener('click', () => {
     document.getElementById('platformArea').style.display = 'flex';
     document.getElementById('dataArea').style.display = 'none';
-    document.getElementById('checksumArea').style.display = 'none';
     document.getElementById('tabPlatform').classList.add('active');
     document.getElementById('tabData').classList.remove('active');
-    document.getElementById('tabChecksum').classList.remove('active');
     renderPlatformSettings();
-})
-document.getElementById('tabChecksum').addEventListener('click', () => {
-    document.getElementById('checksumArea').style.display = 'flex';
-    document.getElementById('dataArea').style.display = 'none';
-    document.getElementById('platformArea').style.display = 'none';
-    document.getElementById('tabChecksum').classList.add('active');
-    document.getElementById('tabData').classList.remove('active');
-    document.getElementById('tabPlatform').classList.remove('active');
-    renderChecksum();
 })
 
 // Which config the currently active tab corresponds to.
 function activeConfigKey() {
     if (document.getElementById('tabPlatform').classList.contains('active')) return 'platform';
-    if (document.getElementById('tabChecksum').classList.contains('active')) return 'checksum';
     return 'dataModel';
 }
 
@@ -2610,7 +2279,6 @@ window.addEventListener('keydown', (e) => {
         // Open based on active tab
         const key = activeConfigKey();
         if (key === 'platform') loadConfig('platform', 'platform settings', processPlatformText, openPlatformInput);
-        else if (key === 'checksum') loadConfig('checksum', 'checksum settings', processChecksumText, openChecksumInput);
         else loadConfig('dataModel', 'data model', processDataModelText, openDataModelInput);
     }
     if (e.ctrlKey && e.key === 's' && e.shiftKey) {
@@ -2618,7 +2286,6 @@ window.addEventListener('keydown', (e) => {
         // Save As based on active tab
         const key = activeConfigKey();
         if (key === 'platform') savePlatformSettingsAs();
-        else if (key === 'checksum') saveChecksumParametersAs();
         else saveDataModelAs();
     }
     else if (e.ctrlKey && e.key === 's') {
@@ -2626,7 +2293,6 @@ window.addEventListener('keydown', (e) => {
         // Save (back to original location) based on active tab
         const key = activeConfigKey();
         if (key === 'platform') savePlatformSettings();
-        else if (key === 'checksum') saveChecksumParameters();
         else if (state.dataModel) saveDataModel();
     }
     // Close file menu when Escape is pressed
@@ -2636,7 +2302,7 @@ window.addEventListener('keydown', (e) => {
 })
 
 // initial
-renderTree(); renderPlatformSettings(); renderChecksum(); setStatus('Ready')
+renderTree(); renderPlatformSettings(); setStatus('Ready')
 
 // Close open custom-select menus on global click
 window.addEventListener('click', () => {

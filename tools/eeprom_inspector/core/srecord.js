@@ -8,7 +8,7 @@
  *
  * Part of the split `core/` business logic. Classic (non-module) script that
  * contributes to the shared global `EEPROM` namespace. Uses
- * EEPROM.sparseToContiguous (from image_loader.js, loaded earlier).
+ * EEPROM.sparseToContiguous (from image-loader.js, loaded earlier).
  */
 (function (EEPROM) {
     'use strict';

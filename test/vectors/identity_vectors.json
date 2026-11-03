@@ -1,0 +1,304 @@
+{
+    "description": [
+        "Golden values of the mEEM v2 identities, shared by the Python and the JavaScript tests.",
+        "Each descriptor is a list of lines, which the descriptor joins with '\n'.",
+        "The blocks start at offset 6, behind the identity header. The models are the neutral golden fixtures."
+    ],
+    "models": [
+        {
+            "datamodel": "test/footprint/production_like/eeprom_datamodel.json",
+            "blocks": [
+                {
+                    "name": "Block01",
+                    "offset": 6,
+                    "data_descriptor": [
+                        "mEEM-data-v2",
+                        "param=p01,uint32,1"
+                    ],
+                    "data_identity": "0xF4D7",
+                    "block_descriptor": [
+                        "mEEM-block-v2",
+                        "block=Block01",
+                        "mgmt=Basic",
+                        "count=1",
+                        "data=F4D7"
+                    ],
+                    "block_identity": "0xD864"
+                },
+                {
+                    "name": "Block02",
+                    "offset": 12,
+                    "data_descriptor": [
+                        "mEEM-data-v2",
+                        "param=p01,uint16,32"
+                    ],
+                    "data_identity": "0x869A",
+                    "block_descriptor": [
+                        "mEEM-block-v2",
+                        "block=Block02",
+                        "mgmt=Basic",
+                        "count=1",
+                        "data=869A"
+                    ],
+                    "block_identity": "0x2D5E"
+                },
+                {
+                    "name": "Block03",
+                    "offset": 78,
+                    "data_descriptor": [
+                        "mEEM-data-v2",
+                        "param=p01,uint16,32"
+                    ],
+                    "data_identity": "0x869A",
+                    "block_descriptor": [
+                        "mEEM-block-v2",
+                        "block=Block03",
+                        "mgmt=Basic",
+                        "count=1",
+                        "data=869A"
+                    ],
+                    "block_identity": "0x2441"
+                },
+                {
+                    "name": "Block04",
+                    "offset": 144,
+                    "data_descriptor": [
+                        "mEEM-data-v2",
+                        "param=p01,uint16,32"
+                    ],
+                    "data_identity": "0x869A",
+                    "block_descriptor": [
+                        "mEEM-block-v2",
+                        "block=Block04",
+                        "mgmt=Basic",
+                        "count=1",
+                        "data=869A"
+                    ],
+                    "block_identity": "0x1B1C"
+                },
+                {
+                    "name": "Block05",
+                    "offset": 210,
+                    "data_descriptor": [
+                        "mEEM-data-v2",
+                        "param=p01,uint16,32"
+                    ],
+                    "data_identity": "0x869A",
+                    "block_descriptor": [
+                        "mEEM-block-v2",
+                        "block=Block05",
+                        "mgmt=Basic",
+                        "count=1",
+                        "data=869A"
+                    ],
+                    "block_identity": "0x1203"
+                },
+                {
+                    "name": "Block06",
+                    "offset": 276,
+                    "data_descriptor": [
+                        "mEEM-data-v2",
+                        "param=p01,uint32,14"
+                    ],
+                    "data_identity": "0x0E4C",
+                    "block_descriptor": [
+                        "mEEM-block-v2",
+                        "block=Block06",
+                        "mgmt=Basic",
+                        "count=1",
+                        "data=0E4C"
+                    ],
+                    "block_identity": "0x5BA7"
+                },
+                {
+                    "name": "Block07",
+                    "offset": 334,
+                    "data_descriptor": [
+                        "mEEM-data-v2",
+                        "param=p01,uint32,14"
+                    ],
+                    "data_identity": "0x0E4C",
+                    "block_descriptor": [
+                        "mEEM-block-v2",
+                        "block=Block07",
+                        "mgmt=Basic",
+                        "count=1",
+                        "data=0E4C"
+                    ],
+                    "block_identity": "0x52B8"
+                },
+                {
+                    "name": "Block08",
+                    "offset": 392,
+                    "data_descriptor": [
+                        "mEEM-data-v2",
+                        "param=p01,uint32,14"
+                    ],
+                    "data_identity": "0x0E4C",
+                    "block_descriptor": [
+                        "mEEM-block-v2",
+                        "block=Block08",
+                        "mgmt=Basic",
+                        "count=1",
+                        "data=0E4C"
+                    ],
+                    "block_identity": "0x251D"
+                },
+                {
+                    "name": "Block09",
+                    "offset": 450,
+                    "data_descriptor": [
+                        "mEEM-data-v2",
+                        "param=p01,uint8,1",
+                        "param=p02,uint8,1",
+                        "param=p03,uint16,1",
+                        "param=p04,uint16,1",
+                        "param=p05,uint16,1"
+                    ],
+                    "data_identity": "0x67C3",
+                    "block_descriptor": [
+                        "mEEM-block-v2",
+                        "block=Block09",
+                        "mgmt=Basic",
+                        "count=1",
+                        "data=67C3"
+                    ],
+                    "block_identity": "0x52AA"
+                },
+                {
+                    "name": "Block10",
+                    "offset": 460,
+                    "data_descriptor": [
+                        "mEEM-data-v2",
+                        "param=p01,uint16,1",
+                        "param=p02,uint16,1",
+                        "param=p03,uint16,1",
+                        "param=p04,uint8,1",
+                        "param=p05,uint8,1",
+                        "param=p06,uint8,14",
+                        "param=p07,uint16,1",
+                        "param=p08,uint16,1",
+                        "param=p09,uint16,1",
+                        "param=p10,uint16,1",
+                        "param=p11,uint16,1",
+                        "param=p12,uint16,1",
+                        "param=p13,uint16,1",
+                        "param=p14,uint16,1",
+                        "param=p15,uint8,1",
+                        "bitfield=b01,1",
+                        "bitfield=b02,1",
+                        "bitfield=b03,1",
+                        "bitfield=b04,1",
+                        "bitfield=b05,1"
+                    ],
+                    "data_identity": "0x4ED4",
+                    "block_descriptor": [
+                        "mEEM-block-v2",
+                        "block=Block10",
+                        "mgmt=Basic",
+                        "count=1",
+                        "data=4ED4"
+                    ],
+                    "block_identity": "0x2F14"
+                },
+                {
+                    "name": "Block11",
+                    "offset": 501,
+                    "data_descriptor": [
+                        "mEEM-data-v2",
+                        "param=p01,uint16,1",
+                        "param=p02,uint16,1",
+                        "param=p03,uint16,1",
+                        "param=p04,uint16,1",
+                        "param=p05,uint16,1",
+                        "param=p06,uint16,1",
+                        "param=p07,uint16,1",
+                        "param=p08,uint16,1"
+                    ],
+                    "data_identity": "0x99B0",
+                    "block_descriptor": [
+                        "mEEM-block-v2",
+                        "block=Block11",
+                        "mgmt=Basic",
+                        "count=1",
+                        "data=99B0"
+                    ],
+                    "block_identity": "0x58C6"
+                },
+                {
+                    "name": "Block12",
+                    "offset": 519,
+                    "data_descriptor": [
+                        "mEEM-data-v2",
+                        "param=p01,uint16,14",
+                        "param=p02,uint16,1",
+                        "param=p03,uint8,1"
+                    ],
+                    "data_identity": "0x16DD",
+                    "block_descriptor": [
+                        "mEEM-block-v2",
+                        "block=Block12",
+                        "mgmt=WearLeveling",
+                        "count=4",
+                        "data=16DD"
+                    ],
+                    "block_identity": "0x345D"
+                }
+            ],
+            "layouts": [
+                {
+                    "endianness": "little",
+                    "descriptor": [
+                        "mEEM-layout-v2",
+                        "endianness=little",
+                        "block=D864,6",
+                        "block=2D5E,12",
+                        "block=2441,78",
+                        "block=1B1C,144",
+                        "block=1203,210",
+                        "block=5BA7,276",
+                        "block=52B8,334",
+                        "block=251D,392",
+                        "block=52AA,450",
+                        "block=2F14,460",
+                        "block=58C6,501",
+                        "block=345D,519"
+                    ],
+                    "eeprom_layout_identity": "0x6C987786",
+                    "identity_header": "91 1F 86 77 98 6C"
+                },
+                {
+                    "endianness": "big",
+                    "descriptor": [
+                        "mEEM-layout-v2",
+                        "endianness=big",
+                        "block=D864,6",
+                        "block=2D5E,12",
+                        "block=2441,78",
+                        "block=1B1C,144",
+                        "block=1203,210",
+                        "block=5BA7,276",
+                        "block=52B8,334",
+                        "block=251D,392",
+                        "block=52AA,450",
+                        "block=2F14,460",
+                        "block=58C6,501",
+                        "block=345D,519"
+                    ],
+                    "eeprom_layout_identity": "0x2DD126E3",
+                    "identity_header": "49 7C E3 26 D1 2D"
+                }
+            ]
+        }
+    ],
+    "headers": [
+        {
+            "eeprom_layout_identity": "0x00000000",
+            "identity_header": "C0 84 00 00 00 00"
+        },
+        {
+            "eeprom_layout_identity": "0xFFFFFFFF",
+            "identity_header": "0F 1D FF FF FF FF"
+        }
+    ]
+}

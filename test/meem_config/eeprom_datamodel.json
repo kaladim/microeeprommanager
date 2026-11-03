@@ -223,6 +223,5 @@
             "data_recovery_strategy": 1,
             "compress_defaults": true
         }
-    ],
-    "checksum_size": 1
+    ]
 }

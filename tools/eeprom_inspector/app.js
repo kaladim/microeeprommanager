@@ -12,7 +12,7 @@
 
     const E = window.EEPROM;
 
-    // ---- The four inputs --------------------------------------------------
+    // ---- The three inputs -------------------------------------------------
     const INPUTS = [
         {
             key: 'image', label: 'EEPROM image', icon: 'fa-microchip',
@@ -28,10 +28,6 @@
             key: 'settings', label: 'Platform settings', icon: 'fa-sliders',
             accept: '.json', hint: 'platform_settings.json (mEEM configuration)', binary: false,
         },
-        {
-            key: 'checksum', label: 'Checksum parameters', icon: 'fa-shield-halved',
-            accept: '.json', hint: 'checksum_parameters.json', binary: false,
-        },
     ];
 
     // key -> { name, error, and the parsed payload (bytes | obj) }
@@ -39,7 +35,6 @@
         image: null,
         datamodel: null,
         settings: null,
-        checksum: null,
     };
 
     let currentModel = null;
@@ -152,10 +147,6 @@
                     payload = E.parsePlatformSettings(content);
                     state.settings = { name: file.name, obj: payload };
                     setCardStatus('settings', 'ok', file.name);
-                } else if (input.key === 'checksum') {
-                    payload = JSON.parse(content);
-                    state.checksum = { name: file.name, obj: payload };
-                    setCardStatus('checksum', 'ok', file.name);
                 }
             } catch (err) {
                 state[input.key] = null;
@@ -180,7 +171,7 @@
     }
 
     function tryBuild() {
-        const ready = state.image && state.datamodel && state.settings && state.checksum;
+        const ready = state.image && state.datamodel && state.settings;
         if (!ready) {
             currentModel = null;
             setReportAvailable(false);
@@ -194,11 +185,10 @@
             // Re-parse the datamodel each build: attachBlockMetadata mutates it,
             // and JSON.parse gives a fresh, clean object every time.
             const dm = JSON.parse(JSON.stringify(state.datamodel.obj));
-            currentModel = E.buildReport(dm, state.settings.obj, state.image.bytes, state.checksum.obj);
+            currentModel = E.buildReport(dm, state.settings.obj, state.image.bytes);
             currentModel.header.image_name = state.image.name;
             currentModel.header.datamodel_name = state.datamodel.name;
             currentModel.header.settings_name = state.settings.name;
-            currentModel.header.checksum_name = state.checksum.name;
             renderReport(currentModel);
             setReportAvailable(true);
             const nBlocks = currentModel.blocks.length;
@@ -285,6 +275,11 @@
             ' instance' + (block.instance_count === 1 ? '' : 's') + '</wa-badge>' +
             '    <span class="num-wrap block-size" data-dec="' + block.total_size + '" data-hex="' + totalHex + '">' +
             '<i class="fa-solid fa-ruler-horizontal"></i> <span class="num">' + totalHex + '</span> bytes</span>' +
+            '    <wa-badge class="addr" appearance="outlined" variant="neutral">@ ' + esc(block.address) + '</wa-badge>' +
+            '    <wa-badge class="identity" appearance="outlined" variant="neutral" title="Block identity: name, management type, instance count and data identity">' +
+            'block ' + esc(block.block_identity) + '</wa-badge>' +
+            '    <wa-badge class="identity" appearance="outlined" variant="neutral" title="Data identity: the parameters and bitfields">' +
+            'data ' + esc(block.data_identity) + '</wa-badge>' +
             '  </span>' +
             '  <wa-button size="small" appearance="outlined" class="block-format-btn" data-block="' + index + '">' +
             '<i class="fa-solid fa-arrow-right-arrow-left" slot="start"></i>' +
@@ -299,17 +294,48 @@
             summary + desc + blockTableHtml(block) + '</wa-details>';
     }
 
+    // The image's identity header against the data model's
+    function identityHeaderHtml(ih) {
+        const stored = '<code>' + esc(ih.stored) + '</code>';
+        const expected = '<code>' + esc(ih.expected) + '</code> <span class="dim">(EEPROM layout identity ' +
+            esc(ih.layout_identity) + ')</span>';
+        let badge, lines;
+
+        if (ih.status === E.HeaderStatus.match) {
+            badge = '<wa-badge variant="success">Matches the data model</wa-badge>';
+            lines = [expected];
+        } else if (ih.status === E.HeaderStatus.other) {
+            badge = '<wa-badge variant="warning">Intact, of another EEPROM layout</wa-badge>';
+            lines = [
+                stored + ' <span class="dim">(EEPROM layout identity ' + esc(ih.stored_layout_identity) + ')</span>',
+                '<span class="dim">The data model\'s:</span> ' + expected,
+                '<span class="dim">The firmware migrates the image if this is the header of one of its legacy models, ' +
+                'and resets it otherwise. A v1 image can look like this too.</span>',
+            ];
+        } else {
+            badge = '<wa-badge variant="danger">Garbage</wa-badge>';
+            lines = [
+                stored + ' <span class="dim">(CRC-16 ' + esc(ih.stored_crc) + ' stored, ' +
+                esc(ih.calculated_crc) + ' calculated)</span>',
+                '<span class="dim">The data model\'s:</span> ' + expected,
+                '<span class="dim">Corrupted, torn, blank or zeroed, or no mEEM v2 image: the firmware resets it.</span>',
+            ];
+        }
+        return '<span class="hdr-status">' + badge + '</span>' +
+            lines.map(function (line) { return '<span class="hdr-line">' + line + '</span>'; }).join('');
+    }
+
     function headerHtml(h) {
         function row(icon, label, value) {
             return '<div class="hdr-row"><span class="hdr-label"><i class="fa-solid ' + icon + '"></i> ' +
                 esc(label) + '</span><span class="hdr-value">' + value + '</span></div>';
         }
-        const cs = esc(JSON.stringify(h.checksum_params));
         return '<wa-card class="report-header">' +
             row('fa-microchip', 'EEPROM image', esc(h.image_name) + ' <span class="dim">(' + h.image_size + ' bytes)</span>') +
             row('fa-sitemap', 'Data model', esc(h.datamodel_name)) +
             row('fa-sliders', 'Platform settings', esc(h.settings_name) + ' <span class="dim">(' + esc(h.endianness) + '-endian)</span>') +
-            row('fa-shield-halved', 'Checksum', esc(h.checksum_name) + ' <span class="dim">(' + h.checksum_size + '-byte)</span> <code>' + cs + '</code>') +
+            row('fa-fingerprint', 'Identity header', identityHeaderHtml(h.identity_header)) +
+            row('fa-shield-halved', 'Instance checksum', 'CRC-16/IBM-3740 <span class="dim">(stored ' + esc(h.endianness) + '-endian)</span>') +
             row('fa-clock', 'Generated', esc(h.date)) +
             '</wa-card>';
     }

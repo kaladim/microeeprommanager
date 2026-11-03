@@ -1,0 +1,239 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "mEEM EEPROM data model",
+    "description": "A datamodel.json: the blocks, parameters and bitfields that the mEEM keeps in the EEPROM.",
+    "$comment": "Follows DataModel.load_from_file() and DataModel.validate() in tools/common/py/data_model.py, which stay the final check. It describes a current model: a legacy one, which the code generator migrates from, may also have 'checksum_size' and names with surrounding whitespace. Stricter than them: an unknown attribute is an error, since the loader would ignore it and a misspelled one would silently take its default; a value of the wrong JSON type is an error, such as a boolean default value, even where the tools would take it. JSON Schema can't express: the count of 'default_value' elements against 'multiplicity', unique names among siblings, the total size of a parameter's bitfields against its type, or an integer literal against a fractional one (validate() rejects 1 for a float type and 1.0 for an integer type). A validator that reads numbers as doubles, like any JavaScript one, can't tell integers apart around the 64-bit limits. What needs the platform settings or the computed defaults, such as the size of the EEPROM, is checked by the code generator.",
+    "type": "object",
+    "required": ["children"],
+    "additionalProperties": false,
+    "properties": {
+        "name": {
+            "type": "string",
+            "description": "Name of the data model. Doesn't have to be a C-language identifier.",
+            "default": ""
+        },
+        "description": {
+            "type": ["string", "null"],
+            "description": "Optional free text.",
+            "default": null
+        },
+        "children": {
+            "type": "array",
+            "description": "The blocks, in the order of their EEPROM areas.",
+            "minItems": 1,
+            "maxItems": 254,
+            "items": { "$ref": "#/$defs/block" }
+        }
+    },
+    "$defs": {
+        "identifier": {
+            "type": "string",
+            "description": "Has to be a valid C-language identifier.",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "description": {
+            "type": ["string", "null"],
+            "description": "Optional. If defined, will appear in the generated sources.",
+            "default": null
+        },
+        "nan": {
+            "description": "A NaN default value of a floating-point parameter, since JSON has no NaN.",
+            "const": "NaN"
+        },
+        "block": {
+            "type": "object",
+            "description": "A group of related parameters.",
+            "required": ["name", "children", "management_type", "data_recovery_strategy"],
+            "additionalProperties": false,
+            "properties": {
+                "name": { "$ref": "#/$defs/identifier" },
+                "description": { "$ref": "#/$defs/description" },
+                "children": {
+                    "type": "array",
+                    "description": "The parameters.",
+                    "minItems": 1,
+                    "items": { "$ref": "#/$defs/parameter" }
+                },
+                "management_type": {
+                    "description": "The block's strategy for EEPROM area management: 0 = Basic, 1 = BackupCopy, 2 = MultiProfile, 3 = WearLeveling.",
+                    "enum": [0, 1, 2, 3]
+                },
+                "instance_count": {
+                    "type": "integer",
+                    "description": "Number of data instances in the EEPROM: 1 for Basic, 2 for BackupCopy, 2 to 15 for MultiProfile and WearLeveling.",
+                    "default": 1
+                },
+                "data_recovery_strategy": {
+                    "description": "The behavior if the data integrity check fails on init: 0 = load defaults and repair the EEPROM area, 1 = just load defaults.",
+                    "enum": [0, 1]
+                },
+                "compress_defaults": {
+                    "type": "boolean",
+                    "description": "Tries to deduce the shortest possible pattern for the default values.",
+                    "default": true
+                }
+            },
+            "patternProperties": {
+                "^compiler_placement_(directive|attribute)_for_(defaults|cache)$": {
+                    "type": "null",
+                    "description": "Unused: data models saved by earlier tools can have it, but no tool reads it. A block's placement is set in the platform settings, under compiler_directives.block_placement_directives.",
+                    "deprecated": true
+                }
+            },
+            "allOf": [
+                {
+                    "if": { "required": ["management_type"], "properties": { "management_type": { "const": 0 } } },
+                    "then": { "properties": { "instance_count": { "const": 1 } } }
+                },
+                {
+                    "if": { "required": ["management_type"], "properties": { "management_type": { "const": 1 } } },
+                    "then": { "required": ["instance_count"], "properties": { "instance_count": { "const": 2 } } }
+                },
+                {
+                    "if": { "required": ["management_type"], "properties": { "management_type": { "enum": [2, 3] } } },
+                    "then": { "required": ["instance_count"], "properties": { "instance_count": { "minimum": 2, "maximum": 15 } } }
+                }
+            ]
+        },
+        "parameter": {
+            "type": "object",
+            "description": "The basic storage unit.",
+            "required": ["name", "data_type"],
+            "additionalProperties": false,
+            "properties": {
+                "name": { "$ref": "#/$defs/identifier" },
+                "description": { "$ref": "#/$defs/description" },
+                "children": {
+                    "type": "array",
+                    "description": "The bitfields. Floating-point types can't contain any.",
+                    "items": { "$ref": "#/$defs/bitfield" },
+                    "default": []
+                },
+                "data_type": {
+                    "description": "0 = uint8, 1 = int8, 2 = uint16, 3 = int16, 4 = uint32, 5 = int32, 6 = uint64, 7 = int64, 8 = float32, 9 = float64.",
+                    "enum": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+                },
+                "multiplicity": {
+                    "type": "integer",
+                    "description": "Values > 1 define the parameter as an array.",
+                    "minimum": 1,
+                    "default": 1
+                },
+                "default_value": {
+                    "type": "array",
+                    "description": "One value of the data type per element, or for a floating-point type the string \"NaN\". The count must be equal to the 'multiplicity'.",
+                    "minItems": 1,
+                    "default": [0]
+                }
+            },
+            "allOf": [
+                {
+                    "if": { "required": ["data_type"], "properties": { "data_type": { "const": 0 } } },
+                    "then": {
+                        "properties": {
+                            "default_value": { "items": { "type": "integer", "minimum": 0, "maximum": 255 } },
+                            "children": { "items": { "properties": { "size_in_bits": { "maximum": 8 } } } }
+                        }
+                    }
+                },
+                {
+                    "if": { "required": ["data_type"], "properties": { "data_type": { "const": 1 } } },
+                    "then": {
+                        "properties": {
+                            "default_value": { "items": { "type": "integer", "minimum": -128, "maximum": 127 } },
+                            "children": { "items": { "properties": { "size_in_bits": { "maximum": 8 } } } }
+                        }
+                    }
+                },
+                {
+                    "if": { "required": ["data_type"], "properties": { "data_type": { "const": 2 } } },
+                    "then": {
+                        "properties": {
+                            "default_value": { "items": { "type": "integer", "minimum": 0, "maximum": 65535 } },
+                            "children": { "items": { "properties": { "size_in_bits": { "maximum": 16 } } } }
+                        }
+                    }
+                },
+                {
+                    "if": { "required": ["data_type"], "properties": { "data_type": { "const": 3 } } },
+                    "then": {
+                        "properties": {
+                            "default_value": { "items": { "type": "integer", "minimum": -32768, "maximum": 32767 } },
+                            "children": { "items": { "properties": { "size_in_bits": { "maximum": 16 } } } }
+                        }
+                    }
+                },
+                {
+                    "if": { "required": ["data_type"], "properties": { "data_type": { "const": 4 } } },
+                    "then": {
+                        "properties": {
+                            "default_value": { "items": { "type": "integer", "minimum": 0, "maximum": 4294967295 } },
+                            "children": { "items": { "properties": { "size_in_bits": { "maximum": 32 } } } }
+                        }
+                    }
+                },
+                {
+                    "if": { "required": ["data_type"], "properties": { "data_type": { "const": 5 } } },
+                    "then": {
+                        "properties": {
+                            "default_value": { "items": { "type": "integer", "minimum": -2147483648, "maximum": 2147483647 } },
+                            "children": { "items": { "properties": { "size_in_bits": { "maximum": 32 } } } }
+                        }
+                    }
+                },
+                {
+                    "if": { "required": ["data_type"], "properties": { "data_type": { "const": 6 } } },
+                    "then": {
+                        "properties": {
+                            "default_value": { "items": { "type": "integer", "minimum": 0, "maximum": 18446744073709551615 } }
+                        }
+                    }
+                },
+                {
+                    "if": { "required": ["data_type"], "properties": { "data_type": { "const": 7 } } },
+                    "then": {
+                        "properties": {
+                            "default_value": { "items": { "type": "integer", "minimum": -9223372036854775808, "maximum": 9223372036854775807 } }
+                        }
+                    }
+                },
+                {
+                    "if": { "required": ["data_type"], "properties": { "data_type": { "const": 8 } } },
+                    "then": {
+                        "required": ["default_value"],
+                        "properties": {
+                            "default_value": { "items": { "anyOf": [{ "type": "number", "minimum": -3.4e38, "maximum": 3.4e38 }, { "$ref": "#/$defs/nan" }] } },
+                            "children": { "maxItems": 0 }
+                        }
+                    }
+                },
+                {
+                    "if": { "required": ["data_type"], "properties": { "data_type": { "const": 9 } } },
+                    "then": {
+                        "required": ["default_value"],
+                        "properties": {
+                            "default_value": { "items": { "anyOf": [{ "type": "number" }, { "$ref": "#/$defs/nan" }] } },
+                            "children": { "maxItems": 0 }
+                        }
+                    }
+                }
+            ]
+        },
+        "bitfield": {
+            "type": "object",
+            "description": "A part of an integer parameter.",
+            "required": ["name", "size_in_bits"],
+            "additionalProperties": false,
+            "properties": {
+                "name": { "$ref": "#/$defs/identifier" },
+                "description": { "$ref": "#/$defs/description" },
+                "size_in_bits": {
+                    "type": "integer",
+                    "description": "Size of the bitfield in bits, at most the size of the parameter's data type.",
+                    "minimum": 1,
+                    "maximum": 64
+                }
+            }
+        }
+    }
+}

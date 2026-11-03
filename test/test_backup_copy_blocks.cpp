@@ -1,6 +1,6 @@
 #include "test_base.hpp"
 
-class BackupCopyBlockTest : public TestBase
+class BackupCopyBlockTest : public CommittedEepromTest
 {
   public:
     BackupCopyBlockTest()
@@ -16,11 +16,14 @@ class BackupCopyBlockTest : public TestBase
     // If the constructor and destructor are not enough for setting up
     // and cleaning up each test, you can define the following methods:
 
-    void SetUp() override {}
+    void SetUp() override
+    {
+        CommittedEepromTest::SetUp(); // Important: Call base class SetUp() first
+    }
 
     void TearDown() override
     {
-        // Code here will be called immediately after each test (right before the destructor).
+        TestBase::TearDown(); // Important: Call base class TearDown()
     }
 
     bool BothInstancesIdenticalInEeeprom(uint8_t block_id)
@@ -96,7 +99,7 @@ TEST_F(BackupCopyBlockTest, BothInstancesInvalidAreRepairedOnlyIfConfigured)
         const auto block_cfg = &MEEM_block_config[block_id];
         const bool repair    = (block_cfg->data_recovery_strategy == MEEM_RECOVER_DEFAULTS_AND_REPAIR);
 
-        eep_sim->erase();
+        EraseBlocks();
         MEEM_DeInit();
         MEEM_Init();
         EXPECT_TRUE(MEEM_GetBlockStatus(block_id).recovered);

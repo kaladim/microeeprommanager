@@ -38,25 +38,14 @@ void MEEM_InitializeBasicBlock(uint8_t block_id)
                 switch (MEEM_ReadOperationTask())
                 {
                     case MEEM_OK:
-                        init_stage = MEEM_INIT_EVALUATE_INSTANCE;
+                        init_stage = MEEM_INIT_CACHE;
                         break;
-                    case MEEM_NOK:
-                        /* Can't read the EEPROM, continue with default values */
+                    case MEEM_BUSY:
+                        break; /* Still busy */
+                    default:
+                        /* Can't read the EEPROM, or the instance is invalid: continue with default values */
                         init_stage = MEEM_INIT_RECOVER_DATA;
                         break;
-                    default:
-                        break; /* Still busy */
-                }
-                break;
-
-            case MEEM_INIT_EVALUATE_INSTANCE:
-                if (MEEM_IsDataValid(block_id))
-                {
-                    init_stage = MEEM_INIT_CACHE;
-                }
-                else
-                {
-                    init_stage = MEEM_INIT_RECOVER_DATA;
                 }
                 break;
 

@@ -28,8 +28,9 @@ uint8_t                   MEEM_work_buffer[MEEM_WORKBUFFER_SIZE] = {0};
 /*    Internal operations                                                     */
 /******************************************************************************/
 /*!
- * \brief     Initiates a read of a block.
+ * \brief     Initiates a read of a block's instance, which the read task checks after the read.
  * \note      Default target of the init operation is MEEM_workBuffer.
+ *            To read a region without the check, set MEEM_IO_INITIATE_UNCHECKED after this call.
  * \param[in] block_id - ID of the block to read
  */
 void MEEM_StartReadOperation(uint8_t block_id)
@@ -69,18 +70,24 @@ void MEEM_StartReadOperation(uint8_t block_id)
 }
 
 /*!
- * \brief   Tries to read a region of EEPROM to the work buffer.
- *          If it's not possible to read from the EEPROM, defaults will be loaded.
+ * \brief   Tries to read a region of EEPROM, and checks the instance read into the work buffer.
+ *          A read started at MEEM_IO_INITIATE_UNCHECKED skips the check.
  * \pre     The request structure should be already prepared!
+ * \retval  MEEM_OK - read, and the instance is valid (or not checked)
+ * \retval  MEEM_INVALID - read, but the instance failed its check
+ * \retval  MEEM_NOK - the EEPROM couldn't be read
+ * \retval  MEEM_BUSY - still in progress
  */
 MEEM_status_t MEEM_ReadOperationTask(void)
 {
     switch (MEEM_global_status.io_request.stage)
     {
         case MEEM_IO_INITIATE:
+        case MEEM_IO_INITIATE_UNCHECKED:
             if (EEAIF_BeginRead(MEEM_global_status.io_request.offset_in_eeprom, MEEM_global_status.io_request.data, MEEM_global_status.io_request.size))
             {
-                MEEM_global_status.io_request.stage = MEEM_IO_WAITING;
+                /* Each start stage has a waiting stage of its own, which remembers whether to check the instance */
+                MEEM_global_status.io_request.stage = (MEEM_IO_INITIATE == MEEM_global_status.io_request.stage) ? MEEM_IO_WAITING : MEEM_IO_WAITING_UNCHECKED;
             }
             else
             {
@@ -91,13 +98,21 @@ MEEM_status_t MEEM_ReadOperationTask(void)
             break;
 
         case MEEM_IO_WAITING:
+        case MEEM_IO_WAITING_UNCHECKED:
             EEAIF_Task();
 
             switch (EEAIF_GetStatus())
             {
                 case EEAIF_OK:
-                    MEEM_global_status.io_request.status = MEEM_OK;
-                    MEEM_global_status.io_request.stage  = MEEM_IO_COMPLETE;
+                    if (MEEM_IO_WAITING == MEEM_global_status.io_request.stage)
+                    {
+                        MEEM_global_status.io_request.stage = MEEM_IO_BEGIN_CHECKSUM;
+                    }
+                    else
+                    {
+                        MEEM_global_status.io_request.status = MEEM_OK;
+                        MEEM_global_status.io_request.stage  = MEEM_IO_COMPLETE;
+                    }
                     break;
 
                 case EEAIF_NOK:
@@ -109,6 +124,43 @@ MEEM_status_t MEEM_ReadOperationTask(void)
                     break; /* Still busy */
             }
             break;
+
+#if (MEEM_CRC_IMPLEMENTATION == MEEM_CRC_HARDWARE)
+        case MEEM_IO_BEGIN_CHECKSUM:
+        case MEEM_IO_WAITING_CHECKSUM:
+        {
+            MEEM_checksum_t checksum;
+
+            switch (MEEM_ChecksumTask(&MEEM_global_status.io_request.stage, &checksum))
+            {
+                case MEEM_OK:
+                    MEEM_global_status.io_request.status = (*((const MEEM_checksum_t*) &MEEM_work_buffer[0]) == checksum) ? MEEM_OK : MEEM_INVALID;
+                    MEEM_global_status.io_request.stage  = MEEM_IO_COMPLETE;
+                    break;
+
+                case MEEM_BUSY:
+                    break; /* Still calculating, or the CRC unit is busy */
+
+                default:
+                    /* The CRC unit failed: the instance counts as unreadable */
+                    MEEM_global_status.io_request.status = MEEM_NOK;
+                    MEEM_global_status.io_request.stage  = MEEM_IO_COMPLETE;
+                    break;
+            }
+        }
+        break;
+#else
+        case MEEM_IO_BEGIN_CHECKSUM:
+        {
+            /* The built-in CRC is calculated within this stage, so there's no stage to wait for it */
+            MEEM_checksum_t checksum =
+                MEEM_CalculateChecksum(&MEEM_work_buffer[sizeof(MEEM_checksum_t)], (MEEM_global_status.io_request.size - sizeof(MEEM_checksum_t)));
+
+            MEEM_global_status.io_request.status = (*((const MEEM_checksum_t*) &MEEM_work_buffer[0]) == checksum) ? MEEM_OK : MEEM_INVALID;
+            MEEM_global_status.io_request.stage  = MEEM_IO_COMPLETE;
+        }
+        break;
+#endif
 
         default:
             break; /* MEEM_IO_COMPLETE */
@@ -126,17 +178,30 @@ void MEEM_StartWriteOperationCachedBlock(uint8_t block_id)
     const MEEM_blockConfig_t*  block_cfg    = &MEEM_block_config[block_id];
     MEEM_blockStatusPrivate_t* block_status = &MEEM_block_status[block_id];
 
-    if ((block_cfg->management_type == MEEM_MGMT_BASIC) || (block_cfg->management_type == MEEM_MGMT_BACKUP_COPY))
-    {
-        MEEM_global_status.io_request.offset_in_eeprom = 0;
-        block_status->index_of_active_instance         = 0;
-    }
+    /* Basic and 'backup copy' blocks, and a rewrite, start at the first instance */
+    MEEM_global_status.io_request.offset_in_eeprom = 0;
+
 #if ((MEEM_USING_MULTI_PROFILE_BLOCKS == true) || (MEEM_USING_WEAR_LEVELING_BLOCKS == true))
-    else
+    if (block_status->rewrite_all)
+    {
+#if (MEEM_USING_WEAR_LEVELING_BLOCKS == true)
+        /* A 'wear-leveling' block starts over with sequence counter 0, which the next instances increment. 'Multi-profile' keeps its active profile. */
+        if (block_cfg->management_type == MEEM_MGMT_WEAR_LEVELING)
+        {
+            block_cfg->cache[0]                    = 0;
+            block_status->index_of_active_instance = 0;
+        }
+#endif
+    }
+    else if ((block_cfg->management_type == MEEM_MGMT_MULTI_PROFILE) || (block_cfg->management_type == MEEM_MGMT_WEAR_LEVELING))
     {
         MEEM_global_status.io_request.offset_in_eeprom = (sizeof(MEEM_checksum_t) + block_cfg->data_size) * (uint16_t) block_status->index_of_active_instance;
     }
 #endif
+
+    /* A write of a 'backup copy' block covers both copies, and a rewrite covers every instance of any block */
+    MEEM_global_status.remaining_instances =
+        ((block_cfg->management_type == MEEM_MGMT_BACKUP_COPY) || block_status->rewrite_all) ? (block_cfg->instance_count - 1u) : 0u;
 
     MEEM_global_status.io_request.offset_in_eeprom += block_cfg->offset_in_eeprom;
     MEEM_global_status.io_request.size   = (block_cfg->data_size + sizeof(MEEM_checksum_t));
@@ -144,7 +209,7 @@ void MEEM_StartWriteOperationCachedBlock(uint8_t block_id)
     MEEM_global_status.io_request.status = MEEM_BUSY;
 
     MEEM_global_status.block_id    = block_id;
-    MEEM_global_status.write_stage = MEEM_IO_INITIATE; /* Next stage to execute */
+    MEEM_global_status.write_stage = MEEM_IO_BEGIN_CHECKSUM; /* Next stage to execute */
 
     /* First stage of write image preparation - copy block's data cache to the work buffer */
     MEEM_EnterCriticalSection();
@@ -163,11 +228,48 @@ bool MEEM_WriteTask(void)
 {
     switch (MEEM_global_status.write_stage)
     {
-        case MEEM_IO_INITIATE:
-            MEEM_CalculateAndSetChecksum();
+#if (MEEM_CRC_IMPLEMENTATION == MEEM_CRC_HARDWARE)
+        case MEEM_IO_BEGIN_CHECKSUM:
+        case MEEM_IO_WAITING_CHECKSUM:
+        {
+            MEEM_checksum_t checksum;
+
+            switch (MEEM_ChecksumTask(&MEEM_global_status.write_stage, &checksum))
+            {
+                case MEEM_OK:
+                    /* Prepare the write image - step 2: Set the checksum */
+                    *((MEEM_checksum_t*) &MEEM_work_buffer[0]) = checksum;
+                    MEEM_WriteInitiate();
+                    MEEM_global_status.write_stage = MEEM_IO_WAITING;
+                    break;
+
+                case MEEM_BUSY:
+                    break; /* Still calculating, or the CRC unit is busy */
+
+                default:
+                {
+                    /* The CRC unit failed: skip the write, and the rest of a rewrite, which ends like a failed one */
+                    MEEM_blockStatusPrivate_t* block_status = &MEEM_block_status[MEEM_global_status.block_id];
+
+                    block_status->write_failed     = true;
+                    block_status->write_complete   = true;
+                    block_status->rewrite_all      = false;
+                    MEEM_global_status.write_stage = MEEM_IO_COMPLETE;
+                }
+                break;
+            }
+        }
+        break;
+#else
+        case MEEM_IO_BEGIN_CHECKSUM:
+            /* Prepare the write image - step 2: Calculate and set the checksum.
+             * The built-in CRC is calculated within this stage, so there's no stage to wait for it. */
+            *((MEEM_checksum_t*) &MEEM_work_buffer[0]) =
+                MEEM_CalculateChecksum(&MEEM_work_buffer[sizeof(MEEM_checksum_t)], (MEEM_global_status.io_request.size - sizeof(MEEM_checksum_t)));
             MEEM_WriteInitiate();
             MEEM_global_status.write_stage = MEEM_IO_WAITING;
             break;
+#endif
 
         case MEEM_IO_WAITING:
             MEEM_global_status.write_stage = MEEM_WriteWaitToComplete();
@@ -182,16 +284,6 @@ bool MEEM_WriteTask(void)
     }
 
     return (MEEM_IO_COMPLETE == MEEM_global_status.write_stage);
-}
-
-/*!
- * \brief   Calculates a checksum over the data and sets in place.
- */
-void MEEM_CalculateAndSetChecksum(void)
-{
-    /* Prepare the write image - step 2: Calculate and set the checksum */
-    *((MEEM_checksum_t*) &MEEM_work_buffer[0]) =
-        MEEM_CalculateChecksum(&MEEM_work_buffer[sizeof(MEEM_checksum_t)], (MEEM_global_status.io_request.size - sizeof(MEEM_checksum_t)));
 }
 
 /*!
@@ -236,7 +328,11 @@ MEEM_ioStage_t MEEM_WriteWaitToComplete(void)
 }
 
 /*!
- * \brief  Execute post-write actions, specific to 'backup copy' and 'wear-leveling' blocks.
+ * \brief  Execute post-write actions: move on to the next instance of a 'backup copy' block or of a rewrite,
+ *         and update the sequence counter of a 'wear-leveling' block.
+ * \retval MEEM_IO_WAITING - the same image is written to the next instance
+ * \retval MEEM_IO_BEGIN_CHECKSUM - the next instance of a rewritten 'wear-leveling' block needs a checksum of its own
+ * \retval MEEM_IO_COMPLETE - every instance of the write is written
  */
 MEEM_ioStage_t MEEM_WriteFinalize(void)
 {
@@ -244,37 +340,86 @@ MEEM_ioStage_t MEEM_WriteFinalize(void)
     MEEM_blockStatusPrivate_t* block_status = &MEEM_block_status[MEEM_global_status.block_id];
     MEEM_ioStage_t             next_stage   = MEEM_IO_COMPLETE;
 
-    /* Most expected result */
-    block_status->write_complete = true;
-
-    switch (block_config->management_type)
+#if (MEEM_USING_WEAR_LEVELING_BLOCKS == true)
+    if (block_config->management_type == MEEM_MGMT_WEAR_LEVELING)
     {
+        /* Update the sequence counter and the active instance index */
+        block_config->cache[0]                 = MEEM_IncrementAndWrapAround(block_config->cache[0], 255);
+        block_status->index_of_active_instance = MEEM_IncrementAndWrapAround(block_status->index_of_active_instance, block_config->instance_count);
+    }
+#endif
+
+    if (MEEM_global_status.remaining_instances > 0u)
+    {
+        MEEM_global_status.remaining_instances--;
+        MEEM_global_status.io_request.offset_in_eeprom += MEEM_global_status.io_request.size;
+
+#if (MEEM_USING_WEAR_LEVELING_BLOCKS == true)
+        if (block_config->management_type == MEEM_MGMT_WEAR_LEVELING)
+        {
+            /* The next instance holds the next sequence counter, so it needs a checksum of its own */
+            MEEM_work_buffer[sizeof(MEEM_checksum_t)] = block_config->cache[0];
+            next_stage                                = MEEM_IO_BEGIN_CHECKSUM;
+        }
+        else
+#endif
+        {
+            /* The same image with the same checksum */
+            MEEM_WriteInitiate();
+            next_stage = MEEM_IO_WAITING;
+        }
+    }
+    else
+    {
+        block_status->write_complete = true;
+        block_status->rewrite_all    = false;
+    }
+
+    return next_stage;
+}
+
+/*!
+ * \brief     Initializes a block from the EEPROM according to its management type, as in v1.
+ * \note      This is a synchronous (blocking) operation!
+ * \param[in] block_id - ID of the block to initialize. The active profile of a multi-profile block is already selected.
+ */
+void MEEM_InitializeBlock(uint8_t block_id)
+{
+    switch (MEEM_block_config[block_id].management_type)
+    {
+#if (MEEM_USING_BASIC_BLOCKS == true)
+        case MEEM_MGMT_BASIC:
+            MEEM_InitializeBasicBlock(block_id);
+            break;
+#endif
 #if (MEEM_USING_BACKUP_COPY_BLOCKS == true)
         case MEEM_MGMT_BACKUP_COPY:
-            block_status->index_of_active_instance++;
-            if (block_status->index_of_active_instance < 2)
-            {
-                /* Initiate write of the backup copy */
-                block_status->write_complete = false;
-
-                MEEM_global_status.io_request.offset_in_eeprom += (block_config->data_size + sizeof(MEEM_checksum_t));
-                MEEM_WriteInitiate();
-                next_stage = MEEM_IO_WAITING;
-            }
+            MEEM_InitializeBackupCopyBlock(block_id);
             break;
 #endif
 #if (MEEM_USING_WEAR_LEVELING_BLOCKS == true)
         case MEEM_MGMT_WEAR_LEVELING:
-            /* Update the sequence counter and the active instance index */
-            block_config->cache[0]                 = MEEM_IncrementAndWrapAround(block_config->cache[0], 255);
-            block_status->index_of_active_instance = MEEM_IncrementAndWrapAround(block_status->index_of_active_instance, block_config->instance_count);
+            MEEM_InitializeWearLevelingBlock(block_id);
+            break;
+#endif
+#if (MEEM_USING_MULTI_PROFILE_BLOCKS == true)
+        case MEEM_MGMT_MULTI_PROFILE:
+            MEEM_InitializeMultiProfileBlock(block_id);
             break;
 #endif
         default:
             break;
     }
+}
 
-    return next_stage;
+/*!
+ * \brief     Requests the rewrite of a block after a reset or a migration: a write that covers every instance.
+ * \param[in] block_id - ID of the block to rewrite
+ */
+void MEEM_RequestRewrite(uint8_t block_id)
+{
+    MEEM_block_status[block_id].write_pending = true;
+    MEEM_block_status[block_id].rewrite_all   = true;
 }
 
 /*!
@@ -321,18 +466,6 @@ void MEEM_RestoreDefaults(uint8_t block_id)
             (void) memcpy(&block_cfg->cache[offset], block_cfg->defaults, (size_t) default_pattern_length);
         }
     }
-}
-
-/*!
- * \brief     Checks the integrity of a block's data (fetched in the work buffer), by performing checksum verification.
- * \param[in] block_id - ID of the block
- * \retval    true - if data is valid
- * \retval    false - if data is not valid
- */
-bool MEEM_IsDataValid(uint8_t block_id)
-{
-    return *((const MEEM_checksum_t*) &MEEM_work_buffer[0]) ==
-           MEEM_CalculateChecksum(&MEEM_work_buffer[sizeof(MEEM_checksum_t)], MEEM_block_config[block_id].data_size);
 }
 
 /*!

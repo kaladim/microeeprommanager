@@ -31,6 +31,8 @@ target_sources(mEEM-Core
     ${CMAKE_CURRENT_SOURCE_DIR}/core/MEEM_BlockManagement_MultiProfile.c
     ${CMAKE_CURRENT_SOURCE_DIR}/core/MEEM_BlockManagement_BackupCopy.c
     ${CMAKE_CURRENT_SOURCE_DIR}/core/MEEM_BlockManagement_WearLeveling.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/MEEM_CRC.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/MEEM_Legacy.c
     ${CMAKE_CURRENT_SOURCE_DIR}/core/MEEM.c
 )
 

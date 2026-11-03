@@ -7,7 +7,7 @@ struct TestData
     uint8_t expected_most_recent_index;
 };
 
-class WearLevelingBlocksTest : public TestBase
+class WearLevelingBlocksTest : public CommittedEepromTest
 {
 public:
     WearLevelingBlocksTest()
@@ -25,11 +25,12 @@ public:
 
     void SetUp() override
     {
+        CommittedEepromTest::SetUp(); // Important: Call base class SetUp() first
     }
 
     void TearDown() override
     {
-        // Code here will be called immediately after each test (right before the destructor).
+        TestBase::TearDown(); // Important: Call base class TearDown()
     }
 
     /// @brief Verifies the initialization happens always from most recent valid instance.
@@ -86,7 +87,7 @@ TEST_F(WearLevelingBlocksTest, InitFromBlankEeprom)
     std::vector<uint8_t> wl_blocks_ids = FilterBlocksByManagementType(MEEM_MGMT_WEAR_LEVELING);
     for (auto block_id : wl_blocks_ids)
     {
-        eep_sim->erase();
+        EraseBlocks();
         MEEM_Init();
         EXPECT_EQ(MEEM_block_status[block_id].index_of_active_instance, 0);
     }
@@ -119,7 +120,7 @@ TEST_F(WearLevelingBlocksTest, RestoredDefaultsAreLoadedAfterReinit)
         {
             SCOPED_TRACE("Block ID: " + std::to_string(block_id) + ", write cycles: " + std::to_string(write_cycles_count));
 
-            eep_sim->erase();
+            EraseBlocks();
             MEEM_DeInit();
             MEEM_Init();
             MEEM_Resume();

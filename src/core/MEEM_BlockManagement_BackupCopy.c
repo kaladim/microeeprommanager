@@ -58,20 +58,20 @@ void MEEM_InitializeBackupCopyBlock(uint8_t block_id)
                     read_status = MEEM_ReadOperationTask();
                 } while (MEEM_BUSY == read_status);
 
-                if (MEEM_OK == read_status)
-                {
-                    init_stage = MEEM_INIT_EVALUATE_INSTANCE;
-                }
-                else
+                if (MEEM_NOK == read_status)
                 {
                     /* Can't read the EEPROM, continue with default values */
                     init_stage = MEEM_INIT_RECOVER_DATA;
+                }
+                else
+                {
+                    init_stage = MEEM_INIT_EVALUATE_INSTANCE; /* Valid or invalid */
                 }
             }
             break;
 
             case MEEM_INIT_EVALUATE_INSTANCE:
-                if (MEEM_IsDataValid(block_id))
+                if (MEEM_OK == MEEM_global_status.io_request.status)
                 {
                     /* This instance is valid, it's enough to populate the cache */
                     instance_validity_mask |= (1 << index_of_current_instance);

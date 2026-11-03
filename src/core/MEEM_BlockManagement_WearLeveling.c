@@ -22,7 +22,7 @@
 /******************************************************************************/
 /*    Macros                                                                  */
 /******************************************************************************/
-#define INVALID_INSTANCE 0xFFu
+#define INVALID_INSTANCE MEEM_INVALID_WL_INSTANCE
 #define INVALID_INDEX    INVALID_INSTANCE
 
 /******************************************************************************/
@@ -88,19 +88,19 @@ void MEEM_InitializeWearLevelingBlock(uint8_t block_id)
                     readStatus = MEEM_ReadOperationTask();
                 } while (MEEM_BUSY == readStatus);
 
-                if (MEEM_OK == readStatus)
+                if (MEEM_NOK == readStatus)
                 {
-                    init_stage = MEEM_INIT_EVALUATE_INSTANCE;
+                    init_stage = MEEM_INIT_RECOVER_DATA;
                 }
                 else
                 {
-                    init_stage = MEEM_INIT_RECOVER_DATA;
+                    init_stage = MEEM_INIT_EVALUATE_INSTANCE; /* Valid or invalid */
                 }
             }
             break;
 
             case MEEM_INIT_EVALUATE_INSTANCE:
-                if (MEEM_IsDataValid(block_id))
+                if (MEEM_OK == MEEM_global_status.io_request.status)
                 {
                     sequence_counters[index_of_current_instance] = MEEM_work_buffer[sizeof(MEEM_checksum_t)];
                 }
@@ -142,9 +142,10 @@ void MEEM_InitializeWearLevelingBlock(uint8_t block_id)
             {
                 MEEM_status_t read_status;
 
-                /* Read the last valid instance directly to the block cache */
+                /* Read the last valid instance directly to the block cache. It was checked during the scan, and only its data is read now. */
                 MEEM_StartReadOperation(block_id);
 
+                MEEM_global_status.io_request.stage = MEEM_IO_INITIATE_UNCHECKED;
                 MEEM_global_status.io_request.offset_in_eeprom =
                     sizeof(MEEM_checksum_t) + /* Since we read directly to the cache, skip the checksum */
                     block_config->offset_in_eeprom + ((sizeof(MEEM_checksum_t) + block_config->data_size) * (uint16_t) block_status->index_of_active_instance);

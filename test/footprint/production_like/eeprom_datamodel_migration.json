@@ -1,0 +1,741 @@
+{
+    "name": "ProductionLikeMigration",
+    "description": "eeprom_datamodel.json with Block09 changed: p02 (uint8) is replaced by p06 (uint16), p04 widens to uint32, and p07 (uint8) is new. Its legacy model is eeprom_datamodel.json; see ../README.md",
+    "children": [
+        {
+            "name": "Block01",
+            "description": null,
+            "children": [
+                {
+                    "name": "p01",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 1,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block02",
+            "description": null,
+            "children": [
+                {
+                    "name": "p01",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 32,
+                    "default_value": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block03",
+            "description": null,
+            "children": [
+                {
+                    "name": "p01",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 32,
+                    "default_value": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block04",
+            "description": null,
+            "children": [
+                {
+                    "name": "p01",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 32,
+                    "default_value": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block05",
+            "description": null,
+            "children": [
+                {
+                    "name": "p01",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 32,
+                    "default_value": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block06",
+            "description": null,
+            "children": [
+                {
+                    "name": "p01",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 14,
+                    "default_value": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block07",
+            "description": null,
+            "children": [
+                {
+                    "name": "p01",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 14,
+                    "default_value": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block08",
+            "description": null,
+            "children": [
+                {
+                    "name": "p01",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 14,
+                    "default_value": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block09",
+            "description": null,
+            "children": [
+                {
+                    "name": "p01",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "p06",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        20
+                    ]
+                },
+                {
+                    "name": "p03",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "p04",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        16383
+                    ]
+                },
+                {
+                    "name": "p05",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "p07",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        128
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block10",
+            "description": null,
+            "children": [
+                {
+                    "name": "p01",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "p02",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "p03",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "p04",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        6
+                    ]
+                },
+                {
+                    "name": "p05",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        255
+                    ]
+                },
+                {
+                    "name": "p06",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 14,
+                    "default_value": [
+                        255,
+                        255,
+                        255,
+                        255,
+                        255,
+                        255,
+                        255,
+                        255,
+                        255,
+                        255,
+                        255,
+                        255,
+                        255,
+                        255
+                    ]
+                },
+                {
+                    "name": "p07",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "p08",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "p09",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "p10",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "p11",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "p12",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "p13",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "p14",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "p15",
+                    "description": null,
+                    "children": [
+                        {
+                            "name": "b01",
+                            "description": null,
+                            "size_in_bits": 1
+                        },
+                        {
+                            "name": "b02",
+                            "description": null,
+                            "size_in_bits": 1
+                        },
+                        {
+                            "name": "b03",
+                            "description": null,
+                            "size_in_bits": 1
+                        },
+                        {
+                            "name": "b04",
+                            "description": null,
+                            "size_in_bits": 1
+                        },
+                        {
+                            "name": "b05",
+                            "description": null,
+                            "size_in_bits": 1
+                        }
+                    ],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        16
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block11",
+            "description": null,
+            "children": [
+                {
+                    "name": "p01",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "p02",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "p03",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "p04",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "p05",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "p06",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "p07",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "p08",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block12",
+            "description": null,
+            "children": [
+                {
+                    "name": "p01",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 14,
+                    "default_value": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                {
+                    "name": "p02",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "p03",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                }
+            ],
+            "management_type": 3,
+            "instance_count": 4,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        }
+    ]
+}

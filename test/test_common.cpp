@@ -4,7 +4,7 @@
 
 using testing::InSequence;
 
-class TestCommon : public TestBase
+class TestCommon : public CommittedEepromTest
 {
   public:
     TestCommon() {}
@@ -16,7 +16,7 @@ class TestCommon : public TestBase
 
     void SetUp() override
     {
-        TestBase::SetUp(); // Important: Call base class SetUp() first
+        CommittedEepromTest::SetUp(); // Important: Call base class SetUp() first
     }
 
     void TearDown() override
@@ -37,12 +37,16 @@ TEST_F(TestCommon, InitFromBlankEeprom)
 
     MEEM_Init();
 
+    // A blank EEPROM has no identity header, so every block is reset
     for (int block_id = 0; block_id < MEEM_BLOCK_COUNT; block_id++)
     {
         EXPECT_TRUE(MEEM_GetBlockStatus(block_id).recovered);
+        EXPECT_TRUE(MEEM_block_status[block_id].rewrite_all);
     }
+    EXPECT_TRUE(MEEM_global_status.identity_pending);
 
     ProcessMeemUntilIdle();
+    EXPECT_EQ(GetHeaderFromEeprom(), CurrentHeader());
 }
 
 TEST_F(TestCommon, InitFromPreviouslyValidEeprom)
@@ -66,6 +70,37 @@ TEST_F(TestCommon, InitFromPreviouslyValidEeprom)
     {
         EXPECT_FALSE(MEEM_GetBlockStatus(block_id).recovered);
     }
+}
+
+TEST_F(TestCommon, EachTestStartsWithTheCurrentIdentityHeader)
+{
+    EXPECT_TRUE(std::equal(MEEM_identity_header, MEEM_identity_header + sizeof(MEEM_identity_header), eep_sim->eeprom.cbegin()));
+    EXPECT_GE(MEEM_block_config[0].offset_in_eeprom, sizeof(MEEM_identity_header)) << "The header overlaps the first block";
+}
+
+TEST_F(TestCommon, InitFromTheGeneratedImage)
+{
+    // The image generator's image of this configuration (meem_add_test_image()): the identity header, then every block with its defaults
+    eep_sim->load_image(MEEM_TEST_IMAGE_FILE);
+
+    ASSERT_TRUE(std::equal(MEEM_identity_header, MEEM_identity_header + sizeof(MEEM_identity_header), eep_sim->eeprom.cbegin()))
+        << "The image " << MEEM_TEST_IMAGE_FILE << " doesn't start with the identity header";
+
+    MEEM_DeInit();
+    MEEM_Init();
+
+    for (uint8_t block_id = 0; block_id < MEEM_BLOCK_COUNT; block_id++)
+    {
+        SCOPED_TRACE("Block ID: " + std::to_string(block_id));
+        const auto block_cfg = &MEEM_block_config[block_id];
+        const auto cache     = std::vector<uint8_t>(block_cfg->cache, block_cfg->cache + block_cfg->data_size);
+
+        EXPECT_FALSE(MEEM_GetBlockStatus(block_id).recovered);
+
+        MEEM_RestoreDefaults(block_id); // Keeps the sequence counter of a wear-leveling block
+        EXPECT_TRUE(std::equal(cache.cbegin(), cache.cend(), block_cfg->cache)) << "The cache doesn't hold the defaults";
+    }
+    EXPECT_FALSE(MEEM_IsBusy()) << "An intact image needs no repair";
 }
 
 TEST_F(TestCommon, DeInitClearsStatusOfAllBlocks)
@@ -173,6 +208,91 @@ TEST_F(TestCommon, EepromDriverFailureWhenWriting)
     for (int block_id = 0; block_id < MEEM_BLOCK_COUNT; block_id++)
     {
         EXPECT_TRUE(MEEM_GetBlockStatus(block_id).write_failed);
+    }
+}
+
+TEST_F(TestCommon, EepromDriverFailureWhenReadingAtInit)
+{
+    MEEM_DeInit();
+
+    eep_sim->return_nok_for_next_jobs(); // Simulate driver failure
+    MEEM_Init();
+    eep_sim->return_ok_for_next_jobs();
+
+    for (int block_id = 0; block_id < MEEM_BLOCK_COUNT; block_id++)
+    {
+        EXPECT_TRUE(MEEM_GetBlockStatus(block_id).recovered) << "Block #" << block_id;
+    }
+    ProcessMeemUntilIdle();
+}
+
+TEST_F(TestCommon, ReadTaskReportsAValidInstance)
+{
+    MEEM_DeInit();
+    MEEM_Init();
+    ProcessMeemUntilIdle();
+
+    for (uint8_t block_id = 0; block_id < MEEM_BLOCK_COUNT; block_id++)
+    {
+        SCOPED_TRACE("Block ID: " + std::to_string(block_id));
+        const auto instance = StoreValidFirstInstance(block_id);
+
+        EXPECT_EQ(ReadFirstInstance(block_id, MEEM_IO_INITIATE), MEEM_OK);
+        EXPECT_TRUE(IsInWorkBuffer(instance));
+    }
+}
+
+TEST_F(TestCommon, ReadTaskReportsAnInvalidInstance)
+{
+    MEEM_DeInit();
+    MEEM_Init();
+    ProcessMeemUntilIdle();
+
+    for (uint8_t block_id = 0; block_id < MEEM_BLOCK_COUNT; block_id++)
+    {
+        SCOPED_TRACE("Block ID: " + std::to_string(block_id));
+        (void) StoreValidFirstInstance(block_id);
+        CorruptInstanceInEeprom(block_id, 0);
+
+        EXPECT_EQ(ReadFirstInstance(block_id, MEEM_IO_INITIATE), MEEM_INVALID);
+    }
+}
+
+TEST_F(TestCommon, ReadTaskReportsAnUnreadableInstance)
+{
+    MEEM_DeInit();
+    MEEM_Init();
+    ProcessMeemUntilIdle();
+
+    for (uint8_t block_id = 0; block_id < MEEM_BLOCK_COUNT; block_id++)
+    {
+        SCOPED_TRACE("Block ID: " + std::to_string(block_id));
+        (void) StoreValidFirstInstance(block_id);
+
+        eep_sim->return_nok_for_next_jobs(); // Simulate driver failure
+        EXPECT_EQ(ReadFirstInstance(block_id, MEEM_IO_INITIATE), MEEM_NOK);
+        eep_sim->return_ok_for_next_jobs();
+    }
+}
+
+TEST_F(TestCommon, UncheckedReadSkipsTheInstanceCheck)
+{
+    MEEM_DeInit();
+    MEEM_Init();
+    ProcessMeemUntilIdle();
+
+    for (uint8_t block_id = 0; block_id < MEEM_BLOCK_COUNT; block_id++)
+    {
+        SCOPED_TRACE("Block ID: " + std::to_string(block_id));
+        (void) StoreValidFirstInstance(block_id);
+        CorruptInstanceInEeprom(block_id, 0);
+
+        const auto offset = MEEM_block_config[block_id].offset_in_eeprom;
+        const auto stored = std::vector<uint8_t>(eep_sim->eeprom.cbegin() + offset,
+                                                 eep_sim->eeprom.cbegin() + offset + sizeof(MEEM_checksum_t) + MEEM_block_config[block_id].data_size);
+
+        EXPECT_EQ(ReadFirstInstance(block_id, MEEM_IO_INITIATE_UNCHECKED), MEEM_OK);
+        EXPECT_TRUE(IsInWorkBuffer(stored));
     }
 }
 

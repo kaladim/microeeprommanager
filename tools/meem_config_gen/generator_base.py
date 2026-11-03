@@ -1,8 +1,6 @@
 ﻿import os
 from abc import ABC
-from datetime import datetime
 from enum import IntEnum
-from tzlocal import get_localzone
 
 
 class CodeGenerator(ABC):
@@ -35,7 +33,8 @@ class CodeGenerator(ABC):
         file_name: str,
         file_content: str,
     ) -> str:
-        """Produces final source file (.c or .h) by incorporating timestamp,multiple inclusion protection macro and file content."""
+        """Produces final source file (.c or .h) from the file header, the multiple inclusion protection macro and the file content.
+        It holds nothing that changes from run to run, so that the same inputs give the same files."""
 
         is_header = file_name.lower().endswith(".h")
         txt = self.generate_file_header(file_name, config_name) + "\n"
@@ -58,7 +57,6 @@ class CodeGenerator(ABC):
         txt = ""
         txt += " \\file   " + file_name + "\n"
         txt += " \\author " + self.author + "\n"
-        txt += " \\date   " + datetime.now(tz=get_localzone()).strftime("%Y-%m-%d %H:%M:%S %Z (UTC%z)") + "\n"
         txt += " \\note   !!! Do not change manually !!!" + "\n"
         txt += f" \\brief  Generated file for '{self.application_name}'" + "\n"
         txt += "\n"

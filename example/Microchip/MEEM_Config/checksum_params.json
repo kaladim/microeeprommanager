@@ -1,7 +1,0 @@
-{
-    "algo": "crc",
-    "polynomial": 285,
-    "initial_value": 0,
-    "reverse_input": false,
-    "final_xor_value": 0
-}

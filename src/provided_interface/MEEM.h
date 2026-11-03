@@ -25,7 +25,8 @@ typedef struct {
     uint8_t write_failed   : 1; /**< Set once when a write operation fails.  */
     uint8_t write_pending  : 1; /**< Set after call to #MEEM_InitiateBlockWrite() */
     uint8_t fetch_pending  : 1; /**< Set after call to #MEEM_InitiateSwitchToProfile(). Apply to 'multi-profile' blocks only! */
-    uint8_t reserved       : 3; /**< Do not use these */
+    uint8_t migrated       : 1; /**< Set once when #MEEM_Init() filled the cache from a legacy data model */
+    uint8_t reserved       : 2; /**< Do not use these */
 } MEEM_blockStatus_t;
 
 /******************************************************************************/
@@ -33,6 +34,13 @@ typedef struct {
 /******************************************************************************/
 /*!
  * \brief Fetches and validates all defined blocks from the EEPROM, and populates caches.
+ *        If the EEPROM starts with the identity header of a legacy data model given to the generator, the blocks are migrated from it:
+ *        each block that isn't unchanged gets its defaults, then its legacy data if there is any, and is marked 'migrated', or 'recovered'
+ *        if there is none. #MEEM_PeriodicTask() rewrites these blocks, then writes the header. Multi-profile blocks that were multi-profile
+ *        blocks in the legacy data model too are migrated after every other block, and written profile by profile within this call,
+ *        which lengthens it by their write time. These writes call no write callback.
+ *        If the EEPROM starts with any other header, as when it's blank or was written by another data model or by mEEM v1, nothing is
+ *        read: every block gets its defaults and is marked 'recovered', and #MEEM_PeriodicTask() rewrites every block, then writes the header.
  * \pre   Call once.
  * \note  It's a synchronous (blocking) operation! Its execution time depends entirely on the configuration!
  */
@@ -40,6 +48,8 @@ EXTERN_C void MEEM_Init(void);
 
 /*!
  * \brief Clears all RAM areas, used by the mEEM.
+ * \pre   #MEEM_IsBusy() returns false. Pending work is dropped: a pending write is lost, and after a reset or a migration that isn't
+ *        committed yet, the next #MEEM_Init() repeats it.
  * \note  The mEEM is not operational after this call. If it needs to be resumed, MEEM_Init() must be called again.
  */
 EXTERN_C void MEEM_DeInit(void);
@@ -58,7 +68,8 @@ EXTERN_C void MEEM_Resume(void);
 
 /*!
  * \brief  Stops acceptance of new write/profile fetch requests
- * \note   Currently pending write/profile fetch requests will still be processed.
+ * \note   Currently pending write/profile fetch requests will still be processed, and so will the rewrites and the identity header write
+ *         after a reset or a migration.
  */
 EXTERN_C void MEEM_Suspend(void);
 
@@ -81,8 +92,9 @@ EXTERN_C bool MEEM_InitiateBlockWrite(uint8_t block_id);
 EXTERN_C void MEEM_RestoreDefaults(uint8_t block_id);
 
 /*!
- * \brief  Checks for an ongoing or pending write/fetch operation in any block.
- * \retval true If there are waiting or currently processed blocks
+ * \brief  Checks for an ongoing or pending write/fetch operation in any block, including the rewrites after a reset or a migration,
+ *         and the identity header write that follows them.
+ * \retval true If there are waiting or currently processed blocks, or the identity header is still to be written
  * \retval false otherwise
  */
 EXTERN_C bool MEEM_IsBusy(void);

@@ -8,6 +8,7 @@
     "external_headers": [],
     "enter_critical_section_operation": null,
     "exit_critical_section_operation": null,
+    "crc_implementation": "table",
     "compiler_directives": {
         "opening_pack_directive": null,
         "closing_pack_directive": null,

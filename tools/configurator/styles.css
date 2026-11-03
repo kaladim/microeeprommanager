@@ -826,9 +826,7 @@ h3 {
 #loadDataModelBtn,
 #saveDataModelBtn,
 #loadPlatformBtn,
-#savePlatformBtn,
-#loadChecksumBtn,
-#saveChecksumBtn {
+#savePlatformBtn {
     background: rgba(0, 122, 204, 0.15);
     border: 1px solid var(--accent);
     color: #fff;
@@ -842,9 +840,7 @@ h3 {
 #loadDataModelBtn:hover,
 #saveDataModelBtn:hover,
 #loadPlatformBtn:hover,
-#savePlatformBtn:hover,
-#loadChecksumBtn:hover,
-#saveChecksumBtn:hover {
+#savePlatformBtn:hover {
     background: rgba(0, 122, 204, 0.25);
     border-color: #50a0e0;
     box-shadow: 0 0 8px rgba(0, 122, 204, 0.3);
@@ -916,4 +912,12 @@ h3 {
     .left {
         width: 260px
     }
+}
+
+/* A read-only identity in a properties panel */
+.identity-value {
+    flex: 1;
+    font-family: "Cascadia Code", "Consolas", monospace;
+    padding: 6px 0;
+    user-select: all;
 }

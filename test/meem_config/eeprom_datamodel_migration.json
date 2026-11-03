@@ -1,0 +1,206 @@
+{
+    "name": "MEEM_test_migration",
+    "description": "Current model of the migration tests. Its legacy models are eeprom_datamodel_migration_legacy_*.json. It has no backup copy block, so that a legacy source of that type needs a reader whose block type the current model doesn't use.",
+    "children": [
+        {
+            "name": "Block_Unchanged",
+            "description": "Unchanged in legacy model 0, moved in legacy model 1",
+            "children": [
+                {
+                    "name": "param",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 4,
+                    "default_value": [
+                        17,
+                        18,
+                        19,
+                        20
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block_Moved",
+            "description": "Moved in both legacy models",
+            "children": [
+                {
+                    "name": "param",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 6,
+                    "default_value": [
+                        33,
+                        34,
+                        35,
+                        36,
+                        37,
+                        38
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block_Basic",
+            "description": "A backup copy block in legacy model 0, a multi-profile block in legacy model 1",
+            "children": [
+                {
+                    "name": "param",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 5,
+                    "default_value": [
+                        49,
+                        50,
+                        51,
+                        52,
+                        53
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block_MultiProfile",
+            "description": "2 profiles in legacy model 0, a basic block in legacy model 1, another parameter list in legacy model 2 that overlaps its new place from below",
+            "children": [
+                {
+                    "name": "param",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 7,
+                    "default_value": [
+                        65,
+                        66,
+                        67,
+                        68,
+                        69,
+                        70,
+                        71
+                    ]
+                }
+            ],
+            "management_type": 2,
+            "instance_count": 3,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block_WearLeveling",
+            "description": "5 instances in legacy model 0, more than any current wear-leveling block",
+            "children": [
+                {
+                    "name": "param",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 8,
+                    "default_value": [
+                        81,
+                        82,
+                        83,
+                        84,
+                        85,
+                        86,
+                        87,
+                        88
+                    ]
+                }
+            ],
+            "management_type": 3,
+            "instance_count": 3,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block_Changed",
+            "description": "Another parameter list in each legacy model",
+            "children": [
+                {
+                    "name": "a",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        97
+                    ]
+                },
+                {
+                    "name": "b",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        25187
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block_New",
+            "description": "No source in any legacy model",
+            "children": [
+                {
+                    "name": "param",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 3,
+                    "default_value": [
+                        113,
+                        114,
+                        115
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Block_Profiles",
+            "description": "2 profiles in legacy model 2, where they lie in the new place of Block_MultiProfile: pass 2 migrates it first",
+            "children": [
+                {
+                    "name": "param",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 4,
+                    "default_value": [
+                        129,
+                        130,
+                        131,
+                        132
+                    ]
+                }
+            ],
+            "management_type": 2,
+            "instance_count": 3,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        }
+    ]
+}

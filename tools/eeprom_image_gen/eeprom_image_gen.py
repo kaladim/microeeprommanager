@@ -1,23 +1,17 @@
 import os
 import sys
 import argparse
-import json
 import struct
 
 sys.path.append(os.path.dirname(__file__))
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from colorama import Fore
 from bincopy import BinFile
-from common.data_model import *
-from common.platform_settings import *
-from common.utils import attach_block_metadata, extract_defaults, param_type_to_format
-from common.checksum_algo import *
-
-checksum_size_to_data_type = {
-    1: Parameter.DataTypes.uint8,
-    2: Parameter.DataTypes.uint16,
-    4: Parameter.DataTypes.uint32,
-}
+from common.py.data_model import *
+from common.py.platform_settings import *
+from common.py.utils import attach_block_metadata, extract_defaults
+from common.py.crc import crc16
+from common.py.identity import eeprom_layout_identity, identity_header
 
 
 def parse_base_address(literal: str) -> int:
@@ -32,14 +26,10 @@ def parse_fill(literal: str) -> bytes:
     return bytes.fromhex(literal[2:4])
 
 
-def load_checksum_params(path: str) -> dict:
-    with open(path, mode="r") as f:
-        return json.load(f)
-
-
-def create_instance_image(block: Block, settings: PlatformSettings, checksum_algo: ChecksumAlgorithm, checksum_size: int) -> bytearray:
+def create_instance_image(block: Block, settings: PlatformSettings) -> bytearray:
     """Creates the image of one block instance: [checksum][data].
-    As in the firmware, the checksum covers the data exactly as stored, including the sequence counter of wear-leveling blocks."""
+    As in the firmware, the checksum is the CRC-16 of the data exactly as stored, including the sequence counter of wear-leveling blocks,
+    and is stored in the target's byte order."""
     data = bytearray()
 
     if block.management_type == Block.ManagementTypes.WearLeveling:
@@ -47,16 +37,18 @@ def create_instance_image(block: Block, settings: PlatformSettings, checksum_alg
 
     data.extend(extract_defaults(block, settings))
 
-    fmt = (">" if settings.endianness == "big" else "<") + param_type_to_format[checksum_size_to_data_type[checksum_size]]
-    return bytearray(struct.pack(fmt, checksum_algo.calculate(data))) + data
+    fmt = (">" if settings.endianness == "big" else "<") + "H"
+    return bytearray(struct.pack(fmt, crc16(data))) + data
 
 
-def create_bin_file(datamodel: DataModel, settings: PlatformSettings, checksum_algo: ChecksumAlgorithm, base_address: int, fill: bytes) -> BinFile:
-    """Creates a BinFile, containing all data."""
+def create_bin_file(datamodel: DataModel, settings: PlatformSettings, base_address: int, fill: bytes) -> BinFile:
+    """Creates a BinFile, containing all data: the identity header at offset 0, then the blocks at their offsets."""
     bf = BinFile(word_size_bits=8)
 
+    bf.add_binary(data=identity_header(eeprom_layout_identity(datamodel, settings.endianness)), address=base_address)  # type: ignore[call-arg]
+
     for block in datamodel.children:
-        instance = create_instance_image(block, settings, checksum_algo, datamodel.checksum_size)
+        instance = create_instance_image(block, settings)
         bf.add_binary(data=instance, address=base_address + block.offset_in_eeprom)  # type: ignore[call-arg]
 
         if block.management_type == Block.ManagementTypes.BackupCopy or block.management_type == Block.ManagementTypes.MultiProfile:
@@ -69,7 +61,7 @@ def create_bin_file(datamodel: DataModel, settings: PlatformSettings, checksum_a
             for i in range(block.instance_count - 1):
                 bf.add_binary(data=[0xFF] * len(instance), address=base_address + block.offset_in_eeprom + (i + 1) * len(instance))  # type: ignore[call-arg]
 
-    # Unused space is everything after the last block, plus the gaps between page-aligned blocks
+    # Unused space is everything after the last block, plus the gaps in front of page-aligned blocks, including a page-aligned first block
     used_size = bf.maximum_address - base_address
     if used_size > settings.eeprom_size:
         raise Exception(f"The datamodel requires {used_size} bytes of EEPROM, but only {settings.eeprom_size} bytes are available")
@@ -88,7 +80,6 @@ if __name__ == "__main__":
 
     parser.add_argument("datamodel", help="Path to the datamodel.json file")
     parser.add_argument("settings", help="Path to the platform_settings.json file")
-    parser.add_argument("checksum_params", help="Path to checksum_parameters.json file")
     parser.add_argument("-a", "--address", default="0x0", help="Base address of the generated image (default: 0x0)")
     parser.add_argument("-f", "--fill", default="0xFF", help="Fill pattern for unused EEPROM space (default: 0xFF)")
     parser.add_argument("-o", "--output", default="./", help="Output directory for generated image (default: ./)")
@@ -98,13 +89,9 @@ if __name__ == "__main__":
     try:
         dataModel = DataModel.load_from_file(args.datamodel)
         settings = PlatformSettings.load_from_file(args.settings)
-        checksum_params = load_checksum_params(args.checksum_params)
 
         attach_block_metadata(datamodel=dataModel, settings=settings)
-        checksum_algo = ChecksumAlgorithm(checksum_params)
-        binFile = create_bin_file(
-            datamodel=dataModel, settings=settings, checksum_algo=checksum_algo, base_address=parse_base_address(args.address), fill=parse_fill(args.fill)
-        )
+        binFile = create_bin_file(datamodel=dataModel, settings=settings, base_address=parse_base_address(args.address), fill=parse_fill(args.fill))
 
         image_path = os.path.join(args.output, "eeprom.hex")
         with open(image_path, "w") as f:

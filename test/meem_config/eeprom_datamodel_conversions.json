@@ -1,0 +1,1549 @@
+{
+    "name": "MEEM_test_conversions",
+    "description": "Current model of the conversion tests: every block is converted by a routine from the legacy model eeprom_datamodel_conversions_legacy.json",
+    "children": [
+        {
+            "name": "From_uint8",
+            "description": "Parameter to_<type> converted from the uint8 of the legacy model",
+            "children": [
+                {
+                    "name": "to_uint8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 3,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 5,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 6,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 7,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 8,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_float64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 9,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "From_int8",
+            "description": "Parameter to_<type> converted from the int8 of the legacy model",
+            "children": [
+                {
+                    "name": "to_uint8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 3,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 5,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 6,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 7,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 8,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_float64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 9,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "From_uint16",
+            "description": "Parameter to_<type> converted from the uint16 of the legacy model",
+            "children": [
+                {
+                    "name": "to_uint8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 3,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 5,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 6,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 7,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 8,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_float64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 9,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "From_int16",
+            "description": "Parameter to_<type> converted from the int16 of the legacy model",
+            "children": [
+                {
+                    "name": "to_uint8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 3,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 5,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 6,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 7,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 8,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_float64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 9,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "From_uint32",
+            "description": "Parameter to_<type> converted from the uint32 of the legacy model",
+            "children": [
+                {
+                    "name": "to_uint8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 3,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 5,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 6,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 7,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 8,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_float64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 9,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "From_int32",
+            "description": "Parameter to_<type> converted from the int32 of the legacy model",
+            "children": [
+                {
+                    "name": "to_uint8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 3,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 5,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 6,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 7,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 8,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_float64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 9,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "From_uint64",
+            "description": "Parameter to_<type> converted from the uint64 of the legacy model",
+            "children": [
+                {
+                    "name": "to_uint8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 3,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 5,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 6,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 7,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 8,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_float64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 9,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "From_int64",
+            "description": "Parameter to_<type> converted from the int64 of the legacy model",
+            "children": [
+                {
+                    "name": "to_uint8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 3,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 5,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 6,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 7,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 8,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_float64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 9,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "From_float32",
+            "description": "Parameter to_<type> converted from the float32 of the legacy model",
+            "children": [
+                {
+                    "name": "to_uint8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 3,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 5,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 6,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 7,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 8,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_float64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 9,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "From_float64",
+            "description": "Parameter to_<type> converted from the float64 of the legacy model",
+            "children": [
+                {
+                    "name": "to_uint8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int8",
+                    "description": null,
+                    "children": [],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int16",
+                    "description": null,
+                    "children": [],
+                    "data_type": 3,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 5,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_uint64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 6,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_int64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 7,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_float32",
+                    "description": null,
+                    "children": [],
+                    "data_type": 8,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                },
+                {
+                    "name": "to_float64",
+                    "description": null,
+                    "children": [],
+                    "data_type": 9,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0.0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Bitfields",
+            "description": "Bitfields mapped by name and clamped, and parameters that gain or lose all their bitfields",
+            "children": [
+                {
+                    "name": "narrowed",
+                    "description": null,
+                    "children": [
+                        {
+                            "name": "a",
+                            "description": null,
+                            "size_in_bits": 2
+                        },
+                        {
+                            "name": "b",
+                            "description": null,
+                            "size_in_bits": 5
+                        }
+                    ],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "signed_narrowed",
+                    "description": null,
+                    "children": [
+                        {
+                            "name": "s",
+                            "description": null,
+                            "size_in_bits": 3
+                        }
+                    ],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_signed",
+                    "description": null,
+                    "children": [
+                        {
+                            "name": "u",
+                            "description": null,
+                            "size_in_bits": 4
+                        }
+                    ],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "to_unsigned",
+                    "description": null,
+                    "children": [
+                        {
+                            "name": "n",
+                            "description": null,
+                            "size_in_bits": 4
+                        }
+                    ],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "renamed",
+                    "description": null,
+                    "children": [
+                        {
+                            "name": "kept",
+                            "description": null,
+                            "size_in_bits": 4
+                        },
+                        {
+                            "name": "added",
+                            "description": null,
+                            "size_in_bits": 4
+                        }
+                    ],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        160
+                    ]
+                },
+                {
+                    "name": "wider_container",
+                    "description": null,
+                    "children": [
+                        {
+                            "name": "x",
+                            "description": null,
+                            "size_in_bits": 12
+                        },
+                        {
+                            "name": "y",
+                            "description": null,
+                            "size_in_bits": 4
+                        }
+                    ],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "gains",
+                    "description": null,
+                    "children": [
+                        {
+                            "name": "lo",
+                            "description": null,
+                            "size_in_bits": 8
+                        },
+                        {
+                            "name": "hi",
+                            "description": null,
+                            "size_in_bits": 8
+                        }
+                    ],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "loses",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "array",
+                    "description": null,
+                    "children": [
+                        {
+                            "name": "a",
+                            "description": null,
+                            "size_in_bits": 2
+                        },
+                        {
+                            "name": "b",
+                            "description": null,
+                            "size_in_bits": 3
+                        }
+                    ],
+                    "data_type": 0,
+                    "multiplicity": 2,
+                    "default_value": [
+                        0,
+                        0
+                    ]
+                },
+                {
+                    "name": "wide",
+                    "description": null,
+                    "children": [
+                        {
+                            "name": "big",
+                            "description": null,
+                            "size_in_bits": 40
+                        },
+                        {
+                            "name": "small",
+                            "description": null,
+                            "size_in_bits": 3
+                        }
+                    ],
+                    "data_type": 6,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "signed_wide",
+                    "description": null,
+                    "children": [
+                        {
+                            "name": "v",
+                            "description": null,
+                            "size_in_bits": 40
+                        }
+                    ],
+                    "data_type": 7,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Multiplicity",
+            "description": "The first min(old, new) elements",
+            "children": [
+                {
+                    "name": "grow",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 4,
+                    "default_value": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ]
+                },
+                {
+                    "name": "shrink",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 2,
+                    "default_value": [
+                        0,
+                        0
+                    ]
+                },
+                {
+                    "name": "grow_converted",
+                    "description": null,
+                    "children": [],
+                    "data_type": 3,
+                    "multiplicity": 3,
+                    "default_value": [
+                        -1,
+                        -2,
+                        -3
+                    ]
+                },
+                {
+                    "name": "shrink_converted",
+                    "description": null,
+                    "children": [],
+                    "data_type": 1,
+                    "multiplicity": 2,
+                    "default_value": [
+                        0,
+                        0
+                    ]
+                },
+                {
+                    "name": "to_array",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 3,
+                    "default_value": [
+                        7,
+                        8,
+                        9
+                    ]
+                },
+                {
+                    "name": "to_scalar",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Runs",
+            "description": "Parameters added, removed and reordered, and unchanged ones that are copied together",
+            "children": [
+                {
+                    "name": "added",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        90
+                    ]
+                },
+                {
+                    "name": "b",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "c",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 4,
+                    "default_value": [
+                        0,
+                        0,
+                        0,
+                        0
+                    ]
+                },
+                {
+                    "name": "d",
+                    "description": null,
+                    "children": [],
+                    "data_type": 4,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "a",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "f",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "g",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "Profiles",
+            "description": "From 2 profiles",
+            "children": [
+                {
+                    "name": "v",
+                    "description": null,
+                    "children": [],
+                    "data_type": 5,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                },
+                {
+                    "name": "w",
+                    "description": null,
+                    "children": [],
+                    "data_type": 0,
+                    "multiplicity": 1,
+                    "default_value": [
+                        33
+                    ]
+                }
+            ],
+            "management_type": 2,
+            "instance_count": 3,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "FromWearLeveling",
+            "description": "From a wear-leveling block",
+            "children": [
+                {
+                    "name": "v",
+                    "description": null,
+                    "children": [],
+                    "data_type": 2,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                }
+            ],
+            "management_type": 0,
+            "instance_count": 1,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        },
+        {
+            "name": "ToWearLeveling",
+            "description": "From a basic block",
+            "children": [
+                {
+                    "name": "v",
+                    "description": null,
+                    "children": [],
+                    "data_type": 1,
+                    "multiplicity": 1,
+                    "default_value": [
+                        0
+                    ]
+                }
+            ],
+            "management_type": 3,
+            "instance_count": 2,
+            "data_recovery_strategy": 0,
+            "compress_defaults": true
+        }
+    ]
+}
